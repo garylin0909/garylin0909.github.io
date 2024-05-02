@@ -16,25 +16,20 @@
     ></script>
   </head>
   <body>
-    <form class="row row-cols-sm-auto g-2 align-items-center">
-      <div class="input-group mb-3 col-sm-5">
+    <form class="row row-cols-md-auto g-2 align-items-center">
+      <div class="d-flex flex-row mb-3 col-md-5">
         <span class="input-group-text" id="addon1">@</span>
-        <input
-          type="text"
-          class="form-control"
-          placeholder="Username"
-          width="40%"
-        />
+        <input type="text" class="form-control" placeholder="Username" />
       </div>
-      <div class="col-sm">
-        <select class="form-select float-end" id="userCity">
+      <div class="col-md">
+        <select class="form-select" id="userCity">
           <option selected>選擇借閱書籍...</option>
           <option value="1">刺殺騎士團長</option>
           <option value="2">冰與火之歌</option>
           <option value="3">其它</option>
         </select>
       </div>
-      <div class="col-sm">
+      <div class="col-md">
         <div class="form-check">
           <input class="form-check-input" type="checkbox" id="borrowrule" />
           <label class="form-check-label" for="borrowrule"
@@ -42,7 +37,7 @@
           >
         </div>
       </div>
-      <div class="col-sm">
+      <div class="col-md">
         <button type="submit" class="btn btn-primary">Submit</button>
       </div>
     </form>
