@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Bootstrap 元件(二)</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>互動視窗</h1>
+      <!-- 觸發互動視窗的按鈕 -->
+      <button
+        type="button"
+        class="btn btn-primary"
+        data-bs-toggle="modal"
+        data-bs-target="#myModal"
+      >
+        商品資訊
+      </button>
+      <!-- 互動視窗 -->
+      <div class="modal fade" id="myModal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3 class="modal-title">夢幻水晶香檳杯</h3>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <img src="cup.jpg" width="50%" class="img-fluid" />
+              <p class="h3 text-end">$30.0</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary">放入購物車</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <hr />
+    <div class="container text-center">
+      <h1>工具提示</h1>
+      <img src="flowers3.jpg" width="70%" class="img-fluid" /><br />
+      <button
+        type="button"
+        class="btn btn-secondary"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        title="太陽花"
+      >
+        在上方顯示工具提示
+      </button>
+      <button
+        type="button"
+        class="btn btn-secondary"
+        data-bs-toggle="tooltip"
+        data-bs-placement="bottom"
+        title="太陽花"
+      >
+        在下方顯示工具提示
+      </button>
+      <button
+        type="button"
+        class="btn btn-secondary"
+        data-bs-toggle="tooltip"
+        data-bs-placement="left"
+        title="太陽花"
+      >
+        在左方顯示工具提示
+      </button>
+      <button
+        type="button"
+        class="btn btn-secondary"
+        data-bs-toggle="tooltip"
+        data-bs-placement="right"
+        title="太陽花"
+      >
+        在右方顯示工具提示
+      </button>
+    </div>
+
+    <script>
+      var tooltipTriggerList = [].slice.call(
+        document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      );
+      var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+    </script>
+
+    <hr />
+
+    <div class="container text-center">
+      <h1>彈出提示</h1>
+      <img src="flowers3.jpg" width="50%" class="img-fluid" /><br />
+      <button
+        type="button"
+        class="btn btn-secondary"
+        data-bs-container="body"
+        data-bs-toggle="popover"
+        data-bs-placement="top"
+        data-bs-content="太陽花"
+      >
+        在上方顯示彈出提示
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        title="圖片標題"
+        data-bs-toggle="popover"
+        data-bs-placement="right"
+        data-bs-content="太陽花"
+      >
+        在右側顯示彈出提示
+      </button>
+
+      <script>
+        var popoverTriggerList = [].slice.call(
+          document.querySelectorAll('[data-bs-toggle="popover"]')
+        );
+        var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+          return new bootstrap.Popover(popoverTriggerEl);
+        });
+      </script>
+    </div>
+
+    <hr />
+    <div class="card text-center" style="width: 400px">
+      <h1>卡片</h1>
+      <div class="card-header">詩句欣賞</div>
+      <div class="card-body">
+        <h5 class="card-title">陶淵明－飲酒其五</h5>
+        <p class="card-text">結廬在人境，而無車馬喧。…。</p>
+        <a href="#" class="btn btn-primary">註釋與賞析</a>
+      </div>
+      <div class="card-footer text-muted">2021年</div>
+    </div>
+    <hr />
+    <h1>摺疊元件</h1>
+    <p>
+      <a
+        class="btn btn-primary"
+        data-bs-toggle="collapse"
+        href="#collapseContent"
+      >
+        白居易－詠菊</a
+      >
+      <button
+        class="btn btn-primary"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#collapseContent"
+      >
+        白居易－詠菊
+      </button>
+    </p>
+    <div class="collapse" id="collapseContent">
+      <div class="card card-body">
+        夜新霜著瓦輕，芭蕉新折敗荷傾。耐寒唯有東籬菊，金粟初開曉更清。
+      </div>
+    </div>
+    <hr />
+    <h1>輪播</h1>
+    <div id="myCarousel" class="carousel slide" data-bs-ride="carousel">
+      <!-- 輪播指示 -->
+      <ol class="carousel-indicators">
+        <li
+          data-bs-target="#myCarousel"
+          data-bs-slide-to="0"
+          class="active"
+        ></li>
+        <li data-bs-target="#myCarousel" data-bs-slide-to="1"></li>
+        <li data-bs-target="#myCarousel" data-bs-slide-to="2"></li>
+      </ol>
+      <!-- 輪播內容 -->
+      <div class="carousel-inner">
+        <div class="carousel-item active">
+          <img src="photo1.jpg" class="d-block w-100" alt="真善美湖區" />
+          <div class="carousel-caption d-none d-md-block">
+            <h5>奧地利真善美湖區</h5>
+          </div>
+        </div>
+        <div class="carousel-item">
+          <img src="photo2.jpg" class="d-block w-100" alt="熊布朗宮" />
+          <div class="carousel-caption d-none d-md-block">
+            <h5>奧地利熊布朗宮</h5>
+          </div>
+        </div>
+        <div class="carousel-item">
+          <img src="photo3.jpg" class="d-block w-100" alt="雪的美術館" />
+          <div class="carousel-caption d-none d-md-block">
+            <h5>北海道雪的美術館</h5>
+          </div>
+        </div>
+      </div>
+      <!-- 輪播控制 -->
+      <a class="carousel-control-prev" href="#myCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+        <span class="visually-hidden">Previous</span></a
+      >
+      <a class="carousel-control-next" href="#myCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+        <span class="visually-hidden">Next</span></a
+      >
+    </div>
+    <hr />
+    <h1>手風琴效果</h1>
+    <div class="accordion" id="myAccordion">
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="heading1">
+          <button
+            type="button"
+            class="accordion-button"
+            data-bs-toggle="collapse"
+            data-bs-target="#collapse1"
+          >
+            梵谷
+          </button>
+        </h2>
+        <div
+          id="collapse1"
+          class="accordion-collapse collapse show"
+          data-bs-parent="#myAccordion"
+        >
+          <div class="accordion-body">
+            <p>《隆河上的星夜》…。</p>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="heading2">
+          <button
+            type="button"
+            class="accordion-button collapsed"
+            data-bs-toggle="collapse"
+            data-bs-target="#collapse2"
+          >
+            雷諾瓦
+          </button>
+        </h2>
+        <div
+          id="collapse2"
+          class="accordion-collapse collapse"
+          data-bs-parent="#myAccordion"
+        >
+          <div class="accordion-body">
+            <p>《煎餅磨坊的舞會》…。</p>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="heading3">
+          <button
+            type="button"
+            class="accordion-button collapsed"
+            data-bs-toggle="collapse"
+            data-bs-target="#collapse3"
+          >
+            馬奈
+          </button>
+        </h2>
+        <div
+          id="collapse3"
+          class="accordion-collapse collapse"
+          data-bs-parent="#myAccordion"
+        >
+          <div class="accordion-body">
+            <p>《草地上的午餐》…。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <hr />
+    <h1>隨堂練習</h1>
+    <div class="accordion" id="myAccordion2">
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="heading1">
+          <button
+            type="button"
+            class="accordion-button"
+            data-bs-toggle="collapse"
+            data-bs-target="#collapse11"
+          >
+            錦瑟
+          </button>
+        </h2>
+        <div
+          id="collapse11"
+          class="accordion-collapse collapse show"
+          data-bs-parent="#myAccordion2"
+        >
+          <div class="accordion-body">
+            <p>
+              錦瑟無端五十弦，一弦一柱思華年。 莊生曉夢迷蝴蝶，望帝春心托杜鵑。
+              滄海月明珠有淚，藍田日暖玉生煙。 此情可待成追憶，只是當時已惘然。
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="heading2">
+          <button
+            type="button"
+            class="accordion-button collapsed"
+            data-bs-toggle="collapse"
+            data-bs-target="#collapse21"
+          >
+            無題
+          </button>
+        </h2>
+        <div
+          id="collapse21"
+          class="accordion-collapse collapse"
+          data-bs-parent="#myAccordion2"
+        >
+          <div class="accordion-body">
+            <p>
+              相見時難別亦難，東風無力百花殘。 春蠶到死絲方盡，蠟炬成灰淚始乾。
+              曉鏡但愁雲鬢改，夜吟應覺月光寒。 蓬萊此去無多路，青鳥殷勤為探看。
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="heading3">
+          <button
+            type="button"
+            class="accordion-button collapsed"
+            data-bs-toggle="collapse"
+            data-bs-target="#collapse31"
+          >
+            登高
+          </button>
+        </h2>
+        <div
+          id="collapse31"
+          class="accordion-collapse collapse"
+          data-bs-parent="#myAccordion2"
+        >
+          <div class="accordion-body">
+            <p>
+              風急天高猿嘯哀，渚清沙白鳥飛迴。 無邊落木蕭蕭下，不盡長江滾滾來。
+              萬里悲秋常作客，百年多病獨登臺。 艱難苦恨繁霜鬢，潦倒新停濁酒杯。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
