@@ -4,218 +4,340 @@
   <head>
     <meta charset="utf-8" />
     <title>我的網頁</title>
-	  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-	  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
   </head>
 
   <body>
-	  <!-- Navbar -->
-	  <nav class="navbar navbar-expand-lg bg-body-tertiary">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="index.html">garylin's website</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="index.html">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="introduction.html">about</a>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Homeworks
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="0305/index.html">0305-我的名片</a></li>
-            <li><a class="dropdown-item" href="0312/w0312.html">0312-網頁容器</a></li>
-            <li><a class="dropdown-item" href="0319/index.html">0319-CSS PART-1</a></li>
-			  <li><a class="dropdown-item" href="0326/index.html">0326-CSS PART-2</a></li>
-			  <li><a class="dropdown-item" href="0416/index.html">0416-Bootstrap網格系統</a></li>
-			  <li><a class="dropdown-item" href="0423/index.html">0423-Bootstrap內容樣式</a></li>
-			  <li><a class="dropdown-item" href="0423/bonus.html">0423-Bonus</a></li>
-			  <li><a class="dropdown-item" href="0430/index.html">0430-Bootstrap公用類別與表單</a></li>
-			  <li><a class="dropdown-item" href="0430/bonus.html">0430-Bonus</a></li>
-			  <li><a class="dropdown-item" href="0507/index.html">0507-Bootstrap元件(一)</a></li>
-			  <li><a class="dropdown-item" href="0514/index.html">0514-Bootstrap元件(二)</a></li>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="index.html">garylin's website</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="index.html"
+                >Home</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="introduction.html">about</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Homeworks
+              </a>
+              <ul class="dropdown-menu">
+                <li>
+                  <a class="dropdown-item" href="0305/index.html"
+                    >0305-我的名片</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" href="0312/w0312.html"
+                    >0312-網頁容器</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" href="0319/index.html"
+                    >0319-CSS PART-1</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" href="0326/index.html"
+                    >0326-CSS PART-2</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" href="0416/index.html"
+                    >0416-Bootstrap網格系統</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" href="0423/index.html"
+                    >0423-Bootstrap內容樣式</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" href="0423/bonus.html">0423-Bonus</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="0430/index.html"
+                    >0430-Bootstrap公用類別與表單</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" href="0430/bonus.html">0430-Bonus</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="0507/index.html"
+                    >0507-Bootstrap元件(一)</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" href="0514/index.html"
+                    >0514-Bootstrap元件(二)</a
+                  >
+                </li>
+              </ul>
+            </li>
           </ul>
-        </li>
-      </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Carousel -->
+    <div id="carouselExample" class="carousel slide">
+      <div class="carousel-inner">
+        <div class="carousel-item active">
+          <img src="人物照1.jpg" class="d-block w-100" alt="..." />
+        </div>
+        <div class="carousel-item">
+          <img src="照2.jpg" class="d-block w-100" alt="..." />
+        </div>
+        <div class="carousel-item">
+          <img src="照3.jpg" class="d-block w-100" alt="..." />
+        </div>
+      </div>
+      <button
+        class="carousel-control-prev"
+        type="button"
+        data-bs-target="#carouselExample"
+        data-bs-slide="prev"
+      >
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+      <button
+        class="carousel-control-next"
+        type="button"
+        data-bs-target="#carouselExample"
+        data-bs-slide="next"
+      >
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
     </div>
-  </div>
-</nav>
-	  
-	  <!-- Carousel -->
-	  <div id="carouselExample" class="carousel slide">
-  <div class="carousel-inner">
-    <div class="carousel-item active">
-      <img src="..." class="d-block w-100" alt="...">
+
+    <!-- Alert -->
+    <div class="alert alert-primary" role="alert">
+      本網站由數資一AI資教組林克宇製作
     </div>
-    <div class="carousel-item">
-      <img src="..." class="d-block w-100" alt="...">
+
+    <!-- Content -->
+    <div class="container text-center">
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <img
+              src="index_img/0305.png"
+              class="card-img-top"
+              alt="..."
+              height="250px"
+            />
+            <div class="card-body">
+              <h5 class="card-title">0305</h5>
+              <p class="card-text">我的名片</p>
+              <a href="0305/index.html" class="btn btn-primary">More...</a>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <img
+              src="index_img/0312.png"
+              class="card-img-top"
+              alt="..."
+              height="250px"
+            />
+            <div class="card-body">
+              <h5 class="card-title">0312</h5>
+              <p class="card-text">網頁容器</p>
+              <a href="0312/w0312.html" class="btn btn-primary">More...</a>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <img
+              src="index_img/0319.png"
+              class="card-img-top"
+              alt="..."
+              height="250px"
+            />
+            <div class="card-body">
+              <h5 class="card-title">0319</h5>
+              <p class="card-text">CSS PART-1</p>
+              <a href="0319/index.html" class="btn btn-primary">More...</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <img
+              src="index_img/0326.png"
+              class="card-img-top"
+              alt="..."
+              height="250px"
+            />
+            <div class="card-body">
+              <h5 class="card-title">0326</h5>
+              <p class="card-text">CSS PART-2</p>
+              <a href="0326/index.html" class="btn btn-primary">More...</a>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <img
+              src="index_img/0416.png"
+              class="card-img-top"
+              alt="..."
+              height="250px"
+            />
+            <div class="card-body">
+              <h5 class="card-title">0416</h5>
+              <p class="card-text">Bootstrap網格系統</p>
+              <a href="0416/index.html" class="btn btn-primary">More...</a>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <img
+              src="index_img/0423.png"
+              class="card-img-top"
+              alt="..."
+              height="250px"
+            />
+            <div class="card-body">
+              <h5 class="card-title">0423</h5>
+              <p class="card-text">Bootstrap內容樣式</p>
+              <a href="0423/index.html" class="btn btn-primary">More...</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <img
+              src="index_img/0423Bonus.png"
+              class="card-img-top"
+              alt="..."
+              height="250px"
+            />
+            <div class="card-body">
+              <h5 class="card-title">0423</h5>
+              <p class="card-text">Bonus</p>
+              <a href="0423/bonus.html" class="btn btn-primary">More...</a>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <img
+              src="index_img/0430.png"
+              class="card-img-top"
+              alt="..."
+              height="250px"
+            />
+            <div class="card-body">
+              <h5 class="card-title">0430</h5>
+              <p class="card-text">Bootstrap公用類別與表單</p>
+              <a href="0430/index.html" class="btn btn-primary">More...</a>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <img
+              src="index_img/0430Bonus.png"
+              class="card-img-top"
+              alt="..."
+              height="250px"
+            />
+            <div class="card-body">
+              <h5 class="card-title">0430</h5>
+              <p class="card-text">0430-Bonus</p>
+              <a href="0430/bonus.html" class="btn btn-primary">More...</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <img
+              src="index_img/0507.png"
+              class="card-img-top"
+              alt="..."
+              height="250px"
+            />
+            <div class="card-body">
+              <h5 class="card-title">0507</h5>
+              <p class="card-text">Bootstrap元件(一)</p>
+              <a href="0507/index.html" class="btn btn-primary">More...</a>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <img
+              src="index_img/0514.png"
+              class="card-img-top"
+              alt="..."
+              height="250px"
+            />
+            <div class="card-body">
+              <h5 class="card-title">0514</h5>
+              <p class="card-text">Bootstrap元件(二)</p>
+              <a href="0514/index.html" class="btn btn-primary">More...</a>
+            </div>
+          </div>
+        </div>
+        <div class="col"></div>
+      </div>
     </div>
-    <div class="carousel-item">
-      <img src="..." class="d-block w-100" alt="...">
+
+    <!-- Footer -->
+    <div class="container text-center">
+      <div class="row">
+        <div class="col">1 of 3</div>
+        <div class="col-10">2 of 3 (wider)</div>
+        <div class="col">3 of 3</div>
+      </div>
     </div>
-  </div>
-  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
-    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Previous</span>
-  </button>
-  <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
-    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Next</span>
-  </button>
-</div>
-	  
-	  <!-- Alert -->
-	  <div class="alert alert-primary" role="alert">
-  本網站由數資一AI資教組林克宇製作
-</div>
-	  
-	  <!-- Content -->
-	  <div class="container text-center">
-  <div class="row">
-    <div class="col">
-      <div class="card">
-  <img src="index_img/0305.png" class="card-img-top" alt="..." height="250px">
-  <div class="card-body">
-    <h5 class="card-title">0305</h5>
-    <p class="card-text">我的名片</p>
-    <a href="0305/index.html" class="btn btn-primary">More...</a>
-  </div>
-</div>
-    </div>
-    <div class="col">
-      <div class="card">
-  <img src="index_img/0312.png" class="card-img-top" alt="..." height="250px">
-  <div class="card-body">
-    <h5 class="card-title">0312</h5>
-    <p class="card-text">網頁容器</p>
-    <a href="0312/w0312.html" class="btn btn-primary">More...</a>
-  </div>
-</div>
-    </div>
-    <div class="col">
-      <div class="card">
-  <img src="index_img/0319.png" class="card-img-top" alt="..." height="250px">
-  <div class="card-body">
-    <h5 class="card-title">0319</h5>
-    <p class="card-text">CSS PART-1</p>
-    <a href="0319/index.html" class="btn btn-primary">More...</a>
-  </div>
-</div>
-    </div>
-  </div>
-		  <div class="row">
-    <div class="col">
-      <div class="card">
-  <img src="index_img/0326.png" class="card-img-top" alt="..." height="250px">
-  <div class="card-body">
-    <h5 class="card-title">0326</h5>
-    <p class="card-text">CSS PART-2</p>
-    <a href="0326/index.html" class="btn btn-primary">More...</a>
-  </div>
-</div>
-    </div>
-    <div class="col">
-      <div class="card">
-  <img src="index_img/0416.png" class="card-img-top" alt="..." height="250px">
-  <div class="card-body">
-    <h5 class="card-title">0416</h5>
-    <p class="card-text">Bootstrap網格系統</p>
-    <a href="0416/index.html" class="btn btn-primary">More...</a>
-  </div>
-</div>
-    </div>
-    <div class="col">
-      <div class="card">
-  <img src="index_img/0423.png" class="card-img-top" alt="..." height="250px">
-  <div class="card-body">
-    <h5 class="card-title">0423</h5>
-    <p class="card-text">Bootstrap內容樣式</p>
-    <a href="0423/index.html" class="btn btn-primary">More...</a>
-  </div>
-</div>
-    </div>
-  </div>
-		  <div class="row">
-    <div class="col">
-      <div class="card">
-  <img src="index_img/0423Bonus.png" class="card-img-top" alt="..." height="250px">
-  <div class="card-body">
-    <h5 class="card-title">0423</h5>
-    <p class="card-text">Bonus</p>
-    <a href="0423/bonus.html" class="btn btn-primary">More...</a>
-  </div>
-</div>
-    </div>
-    <div class="col">
-      <div class="card">
-  <img src="index_img/0430.png" class="card-img-top" alt="..." height="250px">
-  <div class="card-body">
-    <h5 class="card-title">0430</h5>
-    <p class="card-text">Bootstrap公用類別與表單</p>
-    <a href="0430/index.html" class="btn btn-primary">More...</a>
-  </div>
-</div>
-    </div>
-    <div class="col">
-      <div class="card">
-  <img src="index_img/0430Bonus.png" class="card-img-top" alt="..." height="250px">
-  <div class="card-body">
-    <h5 class="card-title">0430</h5>
-    <p class="card-text">0430-Bonus</p>
-    <a href="0430/bonus.html" class="btn btn-primary">More...</a>
-  </div>
-</div>
-    </div>
-  </div>
-		  <div class="row">
-    <div class="col">
-      <div class="card">
-  <img src="index_img/0507.png" class="card-img-top" alt="..." height="250px">
-  <div class="card-body">
-    <h5 class="card-title">0507</h5>
-    <p class="card-text">Bootstrap元件(一)</p>
-    <a href="0507/index.html" class="btn btn-primary">More...</a>
-  </div>
-</div>
-    </div>
-    <div class="col">
-      <div class="card">
-  <img src="index_img/0514.png" class="card-img-top" alt="..." height="250px">
-  <div class="card-body">
-    <h5 class="card-title">0514</h5>
-    <p class="card-text">Bootstrap元件(二)</p>
-    <a href="0514/index.html" class="btn btn-primary">More...</a>
-  </div>
-</div>
-    </div>
-    <div class="col">
-    </div>
-  </div>
-</div>
-	  
-	  <!-- Footer -->
-	  <div class="container text-center">
-  <div class="row">
-    <div class="col">
-      1 of 3
-    </div>
-    <div class="col-10">
-      2 of 3 (wider)
-    </div>
-    <div class="col">
-      3 of 3
-    </div>
-  </div>
-</div>
-	  
-	  
-	  <!--
+
+    <!--
     <h1>這是garylin的第一個網頁</h1>
 
     <h1>這是我最喜歡的運動</h1>
