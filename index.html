@@ -1,447 +1,181 @@
 <!DOCTYPE html>
-
-<html>
+<html lang="zh-Hant">
   <head>
-    <meta charset="utf-8" />
-    <title>我的網頁</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>夜鐵文域 RPG</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Oxanium:wght@400;600;700&display=swap"
       rel="stylesheet"
-      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-      crossorigin="anonymous"
     />
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-      crossorigin="anonymous"
-    ></script>
+    <link rel="stylesheet" href="./styles.css" />
   </head>
-
   <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="index.html">garylin's website</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="index.html"
-                >Home</a
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="introduction.html">about</a>
-            </li>
-            <li class="nav-item dropdown">
-              <a
-                class="nav-link dropdown-toggle"
-                href="#"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                Homeworks
-              </a>
-              <ul class="dropdown-menu">
-                <li>
-                  <a class="dropdown-item" href="0305/index.html"
-                    >0305-我的名片</a
-                  >
-                </li>
-                <li>
-                  <a class="dropdown-item" href="0312/w0312.html"
-                    >0312-網頁容器</a
-                  >
-                </li>
-                <li>
-                  <a class="dropdown-item" href="0319/index.html"
-                    >0319-CSS PART-1</a
-                  >
-                </li>
-                <li>
-                  <a class="dropdown-item" href="0326/index.html"
-                    >0326-CSS PART-2</a
-                  >
-                </li>
-                <li>
-                  <a class="dropdown-item" href="0416/index.html"
-                    >0416-Bootstrap網格系統</a
-                  >
-                </li>
-                <li>
-                  <a class="dropdown-item" href="0423/index.html"
-                    >0423-Bootstrap內容樣式</a
-                  >
-                </li>
-                <li>
-                  <a class="dropdown-item" href="0423/bonus.html">0423-Bonus</a>
-                </li>
-                <li>
-                  <a class="dropdown-item" href="0430/index.html"
-                    >0430-Bootstrap公用類別與表單</a
-                  >
-                </li>
-                <li>
-                  <a class="dropdown-item" href="0430/bonus.html">0430-Bonus</a>
-                </li>
-                <li>
-                  <a class="dropdown-item" href="0507/index.html"
-                    >0507-Bootstrap元件(一)</a
-                  >
-                </li>
-                <li>
-                  <a class="dropdown-item" href="0514/index.html"
-                    >0514-Bootstrap元件(二)</a
-                  >
-                </li>
-              </ul>
-            </li>
-          </ul>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-block">
+          <p class="eyebrow">GitHub Pages Text RPG</p>
+          <h1>夜鐵文域</h1>
+          <p class="subtitle">以純文字戰報推進冒險、鍛造與賭局的暗色系網頁 RPG。</p>
         </div>
-      </div>
-    </nav>
+        <nav class="navbar" aria-label="主選單">
+          <button class="nav-tab is-active" data-view="state">狀態</button>
+          <button class="nav-tab" data-view="adventure">地圖/戰鬥</button>
+          <button class="nav-tab" data-view="forge">鍛造</button>
+          <button class="nav-tab" data-view="equipment">裝備</button>
+          <button class="nav-tab" data-view="casino">賭場</button>
+        </nav>
+      </header>
 
-    <!-- Carousel
-    <div id="carouselExample" class="carousel slide">
-      <div class="carousel-inner">
-        <div class="carousel-item active">
-          <img src="人物照1.jpg" class="d-block w-100" alt="..." />
-        </div>
-        <div class="carousel-item">
-          <img src="照2.jpg" class="d-block w-100" alt="..." />
-        </div>
-        <div class="carousel-item">
-          <img src="照3.jpg" class="d-block w-100" alt="..." />
-        </div>
-      </div>
-      <button
-        class="carousel-control-prev"
-        type="button"
-        data-bs-target="#carouselExample"
-        data-bs-slide="prev"
-      >
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Previous</span>
-      </button>
-      <button
-        class="carousel-control-next"
-        type="button"
-        data-bs-target="#carouselExample"
-        data-bs-slide="next"
-      >
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Next</span>
-      </button>
-    </div> -->
+      <main class="main-grid">
+        <section class="hero-panel panel">
+          <div>
+            <p class="eyebrow">Chronicle</p>
+            <h2>自動戰鬥、材料連動、可儲存進度</h2>
+            <p>
+              每一次戰鬥都會根據敏捷決定先後手，技能會在條件或機率符合時自動發動。
+              掉落的材料能投入鍛造槽，進一步觸發特殊組合加成。
+            </p>
+          </div>
+          <div class="hero-stats" id="hero-quick-stats"></div>
+        </section>
 
-    <!-- Carousel -->
-    <div
-      id="carouselExampleAutoplaying"
-      class="carousel slide"
-      data-bs-ride="carousel"
-      style="height: 600px"
-    >
-      <div class="carousel-inner">
-        <div class="carousel-item active" style="height: 600px">
-          <img src="人物照1.jpg" class="d-block w-100" alt="..." />
+        <section class="content-panel">
+          <article class="view panel is-visible" id="view-state">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">State</p>
+                <h2>角色狀態</h2>
+              </div>
+              <div class="toolbar">
+                <button id="save-button" class="btn btn-primary">手動存檔</button>
+                <button id="reset-button" class="btn btn-ghost">重置進度</button>
+              </div>
+            </div>
+            <div class="stat-grid" id="state-grid"></div>
+            <div class="panel stack">
+              <h3>已學會技能</h3>
+              <div id="skill-list" class="tag-list"></div>
+            </div>
+          </article>
+
+          <article class="view panel" id="view-adventure">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Adventure</p>
+                <h2>地圖與戰鬥</h2>
+              </div>
+              <div class="toolbar">
+                <button id="battle-button" class="btn btn-primary">開始戰鬥</button>
+              </div>
+            </div>
+            <div class="adventure-grid">
+              <div class="panel stack">
+                <h3>可選地圖</h3>
+                <div id="map-list" class="map-list"></div>
+              </div>
+              <div class="panel stack">
+                <h3>遭遇目標</h3>
+                <div id="encounter-card"></div>
+              </div>
+            </div>
+            <div class="panel stack battle-log-panel">
+              <h3>文字戰報</h3>
+              <div id="battle-log" class="battle-log"></div>
+            </div>
+          </article>
+
+          <article class="view panel" id="view-forge">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Forge</p>
+                <h2>鍛造工坊</h2>
+              </div>
+            </div>
+            <div class="forge-grid">
+              <div class="panel stack">
+                <h3>鍛造設定</h3>
+                <label class="field">
+                  <span>製作部位</span>
+                  <select id="forge-slot"></select>
+                </label>
+                <label class="field">
+                  <span>投入材料 1</span>
+                  <select class="forge-material" data-index="0"></select>
+                </label>
+                <label class="field">
+                  <span>投入材料 2</span>
+                  <select class="forge-material" data-index="1"></select>
+                </label>
+                <label class="field">
+                  <span>投入材料 3</span>
+                  <select class="forge-material" data-index="2"></select>
+                </label>
+                <label class="field">
+                  <span>投入材料 4</span>
+                  <select class="forge-material" data-index="3"></select>
+                </label>
+                <button id="forge-button" class="btn btn-primary">開始鍛造</button>
+              </div>
+              <div class="panel stack">
+                <h3>鍛造成果預覽</h3>
+                <div id="forge-preview" class="stack compact"></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="view panel" id="view-equipment">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Equipment</p>
+                <h2>裝備總覽</h2>
+              </div>
+            </div>
+            <div class="equipment-grid" id="equipment-grid"></div>
+          </article>
+
+          <article class="view panel" id="view-casino">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Casino</p>
+                <h2>黑市賭場</h2>
+              </div>
+            </div>
+            <div class="casino-grid">
+              <div class="panel stack">
+                <label class="field">
+                  <span>下注金幣</span>
+                  <input id="bet-amount" type="number" min="1" step="1" value="20" />
+                </label>
+                <div class="game-buttons">
+                  <button class="btn btn-primary casino-button" data-game="dice">擲骰子比大小</button>
+                  <button class="btn btn-primary casino-button" data-game="inBetween">射龍門</button>
+                  <button class="btn btn-primary casino-button" data-game="coin">猜正反</button>
+                </div>
+              </div>
+              <div class="panel stack">
+                <h3>賭局紀錄</h3>
+                <div id="casino-log" class="battle-log"></div>
+              </div>
+            </div>
+          </article>
+        </section>
+      </main>
+
+      <footer class="footer panel">
+        <div>
+          <p class="eyebrow">Contact</p>
+          <p>開發協力：frontier-camp@text-rpg.dev</p>
         </div>
-        <div class="carousel-item" style="height: 600px">
-          <img src="照2.jpg" class="d-block w-100" alt="..." />
+        <div>
+          <p class="eyebrow">About</p>
+          <p>這是一款專為靜態託管設計的純文字 RPG 範例，核心資料以 LocalStorage 保存。</p>
         </div>
-        <div class="carousel-item" style="height: 600px">
-          <img src="照3.jpg" class="d-block w-100" alt="..." />
-        </div>
-      </div>
-      <button
-        class="carousel-control-prev"
-        type="button"
-        data-bs-target="#carouselExampleAutoplaying"
-        data-bs-slide="prev"
-      >
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Previous</span>
-      </button>
-      <button
-        class="carousel-control-next"
-        type="button"
-        data-bs-target="#carouselExampleAutoplaying"
-        data-bs-slide="next"
-      >
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Next</span>
-      </button>
-    </div>
-    <!-- Alert -->
-    <div class="alert alert-primary" role="alert">
-      本網站由數資一AI資教組林克宇製作
+      </footer>
     </div>
 
-    <!-- Content -->
-    <div class="container text-center">
-      <div class="row">
-        <div class="col">
-          <div class="card">
-            <img
-              src="index_img/0305.png"
-              class="card-img-top"
-              alt="..."
-              height="250px"
-            />
-            <div class="card-body">
-              <h5 class="card-title">0305</h5>
-              <p class="card-text">我的名片</p>
-              <a href="0305/index.html" class="btn btn-primary">More...</a>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card">
-            <img
-              src="index_img/0312.png"
-              class="card-img-top"
-              alt="..."
-              height="250px"
-            />
-            <div class="card-body">
-              <h5 class="card-title">0312</h5>
-              <p class="card-text">網頁容器</p>
-              <a href="0312/w0312.html" class="btn btn-primary">More...</a>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card">
-            <img
-              src="index_img/0319.png"
-              class="card-img-top"
-              alt="..."
-              height="250px"
-            />
-            <div class="card-body">
-              <h5 class="card-title">0319</h5>
-              <p class="card-text">CSS PART-1</p>
-              <a href="0319/index.html" class="btn btn-primary">More...</a>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col">
-          <div class="card">
-            <img
-              src="index_img/0326.png"
-              class="card-img-top"
-              alt="..."
-              height="250px"
-            />
-            <div class="card-body">
-              <h5 class="card-title">0326</h5>
-              <p class="card-text">CSS PART-2</p>
-              <a href="0326/index.html" class="btn btn-primary">More...</a>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card">
-            <img
-              src="index_img/0416.png"
-              class="card-img-top"
-              alt="..."
-              height="250px"
-            />
-            <div class="card-body">
-              <h5 class="card-title">0416</h5>
-              <p class="card-text">Bootstrap網格系統</p>
-              <a href="0416/index.html" class="btn btn-primary">More...</a>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card">
-            <img
-              src="index_img/0423.png"
-              class="card-img-top"
-              alt="..."
-              height="250px"
-            />
-            <div class="card-body">
-              <h5 class="card-title">0423</h5>
-              <p class="card-text">Bootstrap內容樣式</p>
-              <a href="0423/index.html" class="btn btn-primary">More...</a>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col">
-          <div class="card">
-            <img
-              src="index_img/0423Bonus.png"
-              class="card-img-top"
-              alt="..."
-              height="250px"
-            />
-            <div class="card-body">
-              <h5 class="card-title">0423</h5>
-              <p class="card-text">Bonus</p>
-              <a href="0423/bonus.html" class="btn btn-primary">More...</a>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card">
-            <img
-              src="index_img/0430.png"
-              class="card-img-top"
-              alt="..."
-              height="250px"
-            />
-            <div class="card-body">
-              <h5 class="card-title">0430</h5>
-              <p class="card-text">Bootstrap公用類別與表單</p>
-              <a href="0430/index.html" class="btn btn-primary">More...</a>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card">
-            <img
-              src="index_img/0430Bonus.png"
-              class="card-img-top"
-              alt="..."
-              height="250px"
-            />
-            <div class="card-body">
-              <h5 class="card-title">0430</h5>
-              <p class="card-text">0430-Bonus</p>
-              <a href="0430/bonus.html" class="btn btn-primary">More...</a>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col">
-          <div class="card">
-            <img
-              src="index_img/0507.png"
-              class="card-img-top"
-              alt="..."
-              height="250px"
-            />
-            <div class="card-body">
-              <h5 class="card-title">0507</h5>
-              <p class="card-text">Bootstrap元件(一)</p>
-              <a href="0507/index.html" class="btn btn-primary">More...</a>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card">
-            <img
-              src="index_img/0514.png"
-              class="card-img-top"
-              alt="..."
-              height="250px"
-            />
-            <div class="card-body">
-              <h5 class="card-title">0514</h5>
-              <p class="card-text">Bootstrap元件(二)</p>
-              <a href="0514/index.html" class="btn btn-primary">More...</a>
-            </div>
-          </div>
-        </div>
-        <div class="col"></div>
-      </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="container text-center">
-      <div class="row">
-        <div class="col-6">
-          <h1>這是我最喜歡的運動</h1>
-
-          <iframe
-            width="560"
-            height="315"
-            src="https://www.youtube.com/embed/_wY0F6KCb7Y?si=26z5D1YPSaDrPwVN"
-            title="YouTube video player"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen
-          ></iframe>
-        </div>
-        <div class="col-6">
-          <h1>我所就讀的學校是</h1>
-
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3615.2784017805598!2d121.5446374!3d25.0246244!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3442a908a8232611%3A0xeebfb2d71a5025c7!2z5ZyL56uL6Ie65YyX5pWZ6IKy5aSn5a24!5e0!3m2!1szh-TW!2stw!4v1708998162820!5m2!1szh-TW!2stw"
-            width="600"
-            height="450"
-            style="border: 0"
-            allowfullscreen=""
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-          ></iframe>
-        </div>
-      </div>
-    </div>
-
-    <!--
-    <h1>這是garylin的第一個網頁</h1>
-
-    <h1>這是我最喜歡的運動</h1>
-
-    <iframe
-      width="560"
-      height="315"
-      src="https://www.youtube.com/embed/_wY0F6KCb7Y?si=26z5D1YPSaDrPwVN"
-      title="YouTube video player"
-      frameborder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      allowfullscreen
-    ></iframe>
-
-    <h1>我所就讀的學校是</h1>
-
-    <iframe
-      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3615.2784017805598!2d121.5446374!3d25.0246244!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3442a908a8232611%3A0xeebfb2d71a5025c7!2z5ZyL56uL6Ie65YyX5pWZ6IKy5aSn5a24!5e0!3m2!1szh-TW!2stw!4v1708998162820!5m2!1szh-TW!2stw"
-      width="600"
-      height="450"
-      style="border: 0"
-      allowfullscreen=""
-      loading="lazy"
-      referrerpolicy="no-referrer-when-downgrade"
-    ></iframe>
-
-    <p><a href="0305/index.html">0305-我的名片</a></p>
-    <p><a href="0312/w0312.html">0312-網頁容器</a></p>
-    <p><a href="0319/index.html">0319-CSS PART-1</a></p>
-    <p><a href="0326/index.html">0326-CSS PART-2</a></p>
-    <p>
-      <a
-        href="https://sites.google.com/stu.ntue.edu.tw/
-garylinswebsite"
-        >0402-Google Sites-1</a
-      >
-    </p>
-    <p><a href="0416/index.html">0416-Bootstrap網格系統</a></p>
-    <p><a href="0423/index.html">0423-Bootstrap內容樣式</a></p>
-    <p><a href="0423/bonus.html">0423-Bonus</a></p>
-    <p><a href="0430/index.html">0430-Bootstrap公用類別與表單</a></p>
-    <p><a href="0430/bonus.html">0430-Bonus</a></p>
-    <p><a href="0507/index.html">0507-Bootstrap元件(一)</a></p>
-    <p><a href="0514/index.html">0514-Bootstrap元件(二)</a></p>
-	-->
+    <script type="module" src="./js/main.js"></script>
   </body>
 </html>
