@@ -13,12 +13,16 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
+    <div class="resource-bar panel">
+      <div class="resource-list" id="resource-bar"></div>
+    </div>
+
     <div class="app-shell">
-      <header class="topbar">
+      <header class="topbar panel">
         <div class="brand-block">
           <p class="eyebrow">GitHub Pages Text RPG</p>
           <h1>夜鐵文域</h1>
-          <p class="subtitle">以純文字戰報推進冒險、鍛造與賭局的暗色系網頁 RPG。</p>
+          <p class="subtitle">黑市、鍛造與樓層探索交織的純文字 RPG。</p>
         </div>
         <nav class="navbar" aria-label="主選單">
           <button class="nav-tab is-active" data-view="state">狀態</button>
@@ -30,18 +34,6 @@
       </header>
 
       <main class="main-grid">
-        <section class="hero-panel panel">
-          <div>
-            <p class="eyebrow">Chronicle</p>
-            <h2>自動戰鬥、材料連動、可儲存進度</h2>
-            <p>
-              每一次戰鬥都會根據敏捷決定先後手，技能會在條件或機率符合時自動發動。
-              掉落的材料能投入鍛造槽，進一步觸發特殊組合加成。
-            </p>
-          </div>
-          <div class="hero-stats" id="hero-quick-stats"></div>
-        </section>
-
         <section class="content-panel">
           <article class="view panel is-visible" id="view-state">
             <div class="section-head">
@@ -54,7 +46,19 @@
                 <button id="reset-button" class="btn btn-ghost">重置進度</button>
               </div>
             </div>
-            <div class="stat-grid" id="state-grid"></div>
+
+            <div class="state-layout">
+              <div class="panel stack">
+                <h3>角色資訊</h3>
+                <div class="stat-grid" id="state-grid"></div>
+              </div>
+              <div class="panel stack">
+                <h3>能力數值</h3>
+                <p id="attribute-points" class="muted-line"></p>
+                <div class="attribute-grid" id="attribute-grid"></div>
+              </div>
+            </div>
+
             <div class="panel stack">
               <h3>已學會技能</h3>
               <div id="skill-list" class="tag-list"></div>
@@ -68,19 +72,22 @@
                 <h2>地圖與戰鬥</h2>
               </div>
               <div class="toolbar">
-                <button id="battle-button" class="btn btn-primary">開始戰鬥</button>
+                <button id="battle-button" class="btn btn-primary">戰鬥</button>
+                <button id="travel-button" class="btn btn-secondary">趕路</button>
               </div>
             </div>
+
             <div class="adventure-grid">
               <div class="panel stack">
-                <h3>可選地圖</h3>
+                <h3>地圖列表</h3>
                 <div id="map-list" class="map-list"></div>
               </div>
               <div class="panel stack">
-                <h3>遭遇目標</h3>
+                <h3>目前探索</h3>
                 <div id="encounter-card"></div>
               </div>
             </div>
+
             <div class="panel stack battle-log-panel">
               <h3>文字戰報</h3>
               <div id="battle-log" class="battle-log"></div>
@@ -94,27 +101,32 @@
                 <h2>鍛造工坊</h2>
               </div>
             </div>
+
             <div class="forge-grid">
               <div class="panel stack">
                 <h3>鍛造設定</h3>
                 <label class="field">
-                  <span>製作部位</span>
+                  <span>裝備類型</span>
                   <select id="forge-slot"></select>
                 </label>
                 <label class="field">
-                  <span>投入材料 1</span>
+                  <span>自訂名稱</span>
+                  <input id="forge-name" type="text" maxlength="18" placeholder="輸入武器或裝備名稱" />
+                </label>
+                <label class="field">
+                  <span>材料 1</span>
                   <select class="forge-material" data-index="0"></select>
                 </label>
                 <label class="field">
-                  <span>投入材料 2</span>
+                  <span>材料 2</span>
                   <select class="forge-material" data-index="1"></select>
                 </label>
                 <label class="field">
-                  <span>投入材料 3</span>
+                  <span>材料 3</span>
                   <select class="forge-material" data-index="2"></select>
                 </label>
                 <label class="field">
-                  <span>投入材料 4</span>
+                  <span>材料 4</span>
                   <select class="forge-material" data-index="3"></select>
                 </label>
                 <button id="forge-button" class="btn btn-primary">開始鍛造</button>
@@ -130,10 +142,40 @@
             <div class="section-head">
               <div>
                 <p class="eyebrow">Equipment</p>
-                <h2>裝備總覽</h2>
+                <h2>裝備配置</h2>
               </div>
             </div>
-            <div class="equipment-grid" id="equipment-grid"></div>
+
+            <div class="equipment-layout">
+              <div class="panel stack">
+                <h3>裝備選擇</h3>
+                <label class="field">
+                  <span>主裝備</span>
+                  <select id="equip-main"></select>
+                </label>
+                <label class="field">
+                  <span>副裝備</span>
+                  <select id="equip-sub"></select>
+                </label>
+                <label class="field">
+                  <span>盔甲</span>
+                  <select id="equip-armor"></select>
+                </label>
+                <label class="field">
+                  <span>頭盔</span>
+                  <select id="equip-helmet"></select>
+                </label>
+                <label class="field">
+                  <span>戒指</span>
+                  <select id="equip-ring"></select>
+                </label>
+                <button id="equip-button" class="btn btn-primary">套用裝備</button>
+              </div>
+              <div class="panel stack">
+                <h3>目前裝備</h3>
+                <div class="equipment-grid" id="equipment-grid"></div>
+              </div>
+            </div>
           </article>
 
           <article class="view panel" id="view-casino">
@@ -165,14 +207,7 @@
       </main>
 
       <footer class="footer panel">
-        <div>
-          <p class="eyebrow">Contact</p>
-          <p>開發協力：frontier-camp@text-rpg.dev</p>
-        </div>
-        <div>
-          <p class="eyebrow">About</p>
-          <p>這是一款專為靜態託管設計的純文字 RPG 範例，核心資料以 LocalStorage 保存。</p>
-        </div>
+        <a class="about-link" href="./about/">關於本站</a>
       </footer>
     </div>
 

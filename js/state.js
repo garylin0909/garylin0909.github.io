@@ -1,35 +1,60 @@
-import { EQUIPMENT_SLOTS, MAPS } from "./data.js";
+import {
+  ATTRIBUTE_KEYS,
+  EQUIP_SLOTS,
+  MAPS,
+  STARTER_ITEMS,
+  SUBTYPE_COMPATIBILITY,
+} from "./data.js";
 import { loadFromStorage, saveToStorage } from "./storage.js";
 
-function buildEquipmentState() {
-  return Object.fromEntries(EQUIPMENT_SLOTS.map((slot) => [slot, null]));
+function buildMapProgress() {
+  return Object.fromEntries(MAPS.map((map) => [map.id, { floor: 1 }]));
+}
+
+function buildInventory() {
+  return STARTER_ITEMS.map((item) => structuredClone(item));
+}
+
+function buildEquipped() {
+  return {
+    main: null,
+    sub: STARTER_ITEMS.find((item) => item.id === "starter-shield") ?? null,
+    armor: null,
+    helmet: STARTER_ITEMS.find((item) => item.id === "starter-helmet") ?? null,
+    ring: STARTER_ITEMS.find((item) => item.id === "starter-ring") ?? null,
+  };
 }
 
 export function createDefaultState() {
   return {
+    playerSeed: crypto.randomUUID(),
     level: 1,
     exp: 0,
-    hpMax: 120,
-    hp: 120,
-    str: 10,
-    vit: 10,
-    luck: 8,
-    dex: 9,
-    agi: 8,
+    expToNext: 100,
     gold: 120,
+    attributePoints: 0,
+    attributes: {
+      str: 1,
+      vit: 1,
+      dex: 1,
+      agi: 1,
+      luck: 1,
+    },
     materials: {
       iron: 2,
       leather: 2,
       crystal: 1,
+      silver: 1,
       gold: 0,
-      silver: 0,
       ember: 0,
     },
     skills: [],
-    equipment: buildEquipmentState(),
+    inventory: buildInventory(),
+    equipped: buildEquipped(),
     selectedMapId: MAPS[0].id,
+    mapProgress: buildMapProgress(),
     logs: {
-      battle: ["系統準備完成，選擇地圖後即可開始戰鬥。"],
+      battle: ["系統準備完成，選擇地圖後即可戰鬥或趕路。"],
       casino: ["黑市賭場已開門，輸贏全看運氣。"],
     },
   };
@@ -40,9 +65,12 @@ function mergeLoadedState(loadedState) {
   return {
     ...base,
     ...loadedState,
+    attributes: { ...base.attributes, ...(loadedState?.attributes ?? {}) },
     materials: { ...base.materials, ...(loadedState?.materials ?? {}) },
     skills: Array.isArray(loadedState?.skills) ? loadedState.skills : base.skills,
-    equipment: { ...base.equipment, ...(loadedState?.equipment ?? {}) },
+    inventory: Array.isArray(loadedState?.inventory) ? loadedState.inventory : base.inventory,
+    equipped: { ...base.equipped, ...(loadedState?.equipped ?? {}) },
+    mapProgress: { ...base.mapProgress, ...(loadedState?.mapProgress ?? {}) },
     logs: { ...base.logs, ...(loadedState?.logs ?? {}) },
   };
 }
@@ -69,13 +97,10 @@ export function createStore() {
       return state;
     },
     setState(updater, options = { save: true }) {
-      const nextState = typeof updater === "function" ? updater(state) : updater;
-      state = nextState;
-
+      state = typeof updater === "function" ? updater(state) : updater;
       if (options.save) {
         persist();
       }
-
       notify();
     },
     reset() {
@@ -90,61 +115,87 @@ export function createStore() {
   };
 }
 
+export function addAttributePoint(state, key) {
+  if (!ATTRIBUTE_KEYS.includes(key) || state.attributePoints <= 0) {
+    return state;
+  }
+
+  const nextState = structuredClone(state);
+  nextState.attributePoints -= 1;
+  nextState.attributes[key] += 1;
+  return nextState;
+}
+
 export function gainRewards(state, rewards) {
   const nextState = structuredClone(state);
   nextState.exp += rewards.exp ?? 0;
   nextState.gold += rewards.gold ?? 0;
 
-  // 升級曲線目前採簡單線性設計：需求值 = 等級 * 100。
-  // 若未來想改成職業制或指數成長，只需要替換這段 while 條件與升級後的成長公式。
-  while (nextState.exp >= nextState.level * 100) {
-    nextState.exp -= nextState.level * 100;
+  // 升級改成只增加可分配點數，讓玩家自由養成五項能力值。
+  while (nextState.exp >= nextState.expToNext) {
+    nextState.exp -= nextState.expToNext;
     nextState.level += 1;
-    nextState.hpMax += 14;
-    nextState.str += 2;
-    nextState.vit += 2;
-    nextState.dex += 1;
-    nextState.agi += 1;
-    nextState.luck += 1;
-    nextState.hp = nextState.hpMax;
+    nextState.attributePoints += 5;
+    nextState.expToNext = 100 + (nextState.level - 1) * 35;
   }
 
   return nextState;
 }
 
-export function applyBattleResult(state, battleResult) {
+export function applyAdventureResult(state, adventureResult) {
   const nextState = structuredClone(state);
-  nextState.logs.battle = battleResult.logs;
+  nextState.logs.battle = adventureResult.logs;
+  const currentMap = nextState.selectedMapId;
 
-  if (!battleResult.victory) {
-    nextState.hp = Math.max(1, Math.round(nextState.hpMax * 0.35));
+  if (!adventureResult.victory && adventureResult.mode === "travel" && adventureResult.climbed > 0) {
+    nextState.mapProgress[currentMap].floor = Math.min(1000, nextState.mapProgress[currentMap].floor + adventureResult.climbed);
     return nextState;
   }
 
-  const rewardedState = gainRewards(nextState, battleResult.rewards);
-  rewardedState.hp = Math.max(20, rewardedState.hpMax - Math.max(0, rewardedState.vit - 4));
+  if (!adventureResult.victory) {
+    return nextState;
+  }
 
-  battleResult.rewards.drops.forEach((drop) => {
+  const rewarded = gainRewards(nextState, adventureResult.rewards);
+  rewarded.mapProgress[currentMap].floor = Math.min(1000, rewarded.mapProgress[currentMap].floor + adventureResult.climbed);
+
+  adventureResult.rewards.drops.forEach((drop) => {
     if (drop.type === "material") {
-      rewardedState.materials[drop.id] = (rewardedState.materials[drop.id] ?? 0) + 1;
+      rewarded.materials[drop.id] = (rewarded.materials[drop.id] ?? 0) + 1;
     }
 
-    if (drop.type === "skill" && !rewardedState.skills.includes(drop.id)) {
-      rewardedState.skills.push(drop.id);
+    if (drop.type === "skill" && !rewarded.skills.includes(drop.id)) {
+      rewarded.skills.push(drop.id);
     }
   });
 
-  return rewardedState;
+  return rewarded;
 }
 
 export function applyForgeResult(state, forgedItem) {
   const nextState = structuredClone(state);
-
   forgedItem.materials.forEach((materialId) => {
     nextState.materials[materialId] = Math.max(0, (nextState.materials[materialId] ?? 0) - 1);
   });
+  nextState.inventory.push(forgedItem);
+  return nextState;
+}
 
-  nextState.equipment[forgedItem.slot] = forgedItem;
+export function applyEquipmentSelection(state, selection) {
+  const nextState = structuredClone(state);
+  const inventoryMap = new Map(nextState.inventory.map((item) => [item.id, item]));
+
+  EQUIP_SLOTS.forEach((slot) => {
+    const selectedId = selection[slot] || "";
+    nextState.equipped[slot] = selectedId ? structuredClone(inventoryMap.get(selectedId) ?? null) : null;
+  });
+
+  const mainSubtype = nextState.equipped.main?.subtype ?? null;
+  const allowedSubs = mainSubtype ? SUBTYPE_COMPATIBILITY[mainSubtype] ?? [] : [];
+  if (nextState.equipped.sub && !allowedSubs.includes(nextState.equipped.sub.subtype)) {
+    nextState.equipped.sub = null;
+  }
+
   return nextState;
 }
 

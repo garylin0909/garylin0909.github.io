@@ -1,59 +1,62 @@
-import { FORGEABLE_SLOTS, MATERIAL_DEFS, SYNERGY_RULES } from "./data.js";
+import { FORGEABLE_TYPES, MATERIAL_DEFS } from "./data.js";
 
-export function getForgeCapacity(slot) {
-  return FORGEABLE_SLOTS[slot] ?? 0;
+export function getForgeCapacity(type) {
+  return FORGEABLE_TYPES[type]?.materialLimit ?? 0;
 }
 
-export function calculateForgeResult(slot, materialIds) {
-  const capacity = getForgeCapacity(slot);
-  const pickedMaterials = materialIds.filter(Boolean).slice(0, capacity);
-  const statTotals = {};
-  const synergyLog = [];
+function simpleHash(input) {
+  let hash = 0;
+  for (let index = 0; index < input.length; index += 1) {
+    hash = (hash * 31 + input.charCodeAt(index)) >>> 0;
+  }
+  return hash;
+}
 
-  pickedMaterials.forEach((materialId) => {
+function clampStat(value, minimum = 0) {
+  return Math.max(minimum, Math.round(value));
+}
+
+export function calculateForgeResult(type, customName, materialIds, playerSeed) {
+  const typeDef = FORGEABLE_TYPES[type];
+  const capacity = getForgeCapacity(type);
+  const materials = materialIds.filter(Boolean).slice(0, capacity);
+  const baseStats = { atk: 0, def: 0, luck: 0, durability: 0 };
+
+  materials.forEach((materialId) => {
     const material = MATERIAL_DEFS[materialId];
     if (!material) {
       return;
     }
 
-    statTotals[material.stat] = (statTotals[material.stat] ?? 0) + material.value;
+    baseStats.atk += material.atk;
+    baseStats.def += material.def;
+    baseStats.luck += material.luck;
+    baseStats.durability += material.durability;
   });
 
-  // 這裡保留「連動效果框架」：
-  // 先找出符合的材料組合，再針對組合內的材料底值進行乘算。
-  // 未來如果要改成更複雜的條件，例如槽位順序、品質階級、稀有度權重，
-  // 可以在這個規則層擴充，而不需要改動 UI 或整個鍛造流程。
-  SYNERGY_RULES.forEach((rule) => {
-    const matched = rule.materials.every((materialId) => pickedMaterials.includes(materialId));
-    if (!matched) {
-      return;
-    }
+  const normalizedName = customName.trim() || `${typeDef.label}試作型`;
+  const hash = simpleHash(`${playerSeed}:${type}:${normalizedName}`);
+  const atkRate = 0.9 + ((hash % 21) / 100);
+  const defRate = 0.9 + (((hash >> 5) % 21) / 100);
+  const luckRate = 0.85 + (((hash >> 10) % 26) / 100);
+  const durabilityRate = 0.9 + (((hash >> 15) % 21) / 100);
 
-    rule.materials.forEach((materialId) => {
-      const material = MATERIAL_DEFS[materialId];
-      if (!material) {
-        return;
-      }
-
-      const bonus = material.value * (rule.multiplier - 1);
-      statTotals[material.stat] = (statTotals[material.stat] ?? 0) + bonus;
-    });
-
-    synergyLog.push(`${rule.label} x${rule.multiplier.toFixed(2)}`);
-  });
-
-  const normalizedStats = Object.fromEntries(
-    Object.entries(statTotals).map(([stat, value]) => [stat, Math.round(value)]),
-  );
+  // 名稱雜湊只影響最終成品，不改動材料底值。
+  // 這樣同材料下，不同玩家或不同命名都能得到有差異但可預期的成品表現。
+  const finalStats = {
+    atk: clampStat(baseStats.atk * atkRate),
+    def: clampStat(baseStats.def * defRate),
+    luck: clampStat(baseStats.luck * luckRate),
+    durability: clampStat(baseStats.durability * durabilityRate, 1),
+  };
 
   return {
-    slot,
-    capacity,
-    materials: pickedMaterials,
-    stats: normalizedStats,
-    synergies: synergyLog,
-    name: `${slot}・試作 ${
-      pickedMaterials.map((materialId) => MATERIAL_DEFS[materialId]?.name ?? "未知").join("/")
-    }`,
+    id: `crafted-${type}-${hash.toString(16)}`,
+    name: normalizedName,
+    slot: typeDef.slot,
+    subtype: type,
+    stats: finalStats,
+    materials,
+    hashRates: { atkRate, defRate, luckRate, durabilityRate },
   };
 }

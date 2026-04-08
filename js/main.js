@@ -1,9 +1,16 @@
-import { runAutoBattle } from "./battle.js";
-import { CASINO_GAMES, MAPS, MATERIAL_DEFS } from "./data.js";
+import { runAdventure } from "./battle.js";
+import { CASINO_GAMES, MAPS } from "./data.js";
 import { calculateForgeResult, getForgeCapacity } from "./forge.js";
 import { playCoin, playDice, playInBetween } from "./gamble.js";
 import { clearStorage } from "./storage.js";
-import { applyBattleResult, applyCasinoResult, applyForgeResult, createStore } from "./state.js";
+import {
+  addAttributePoint,
+  applyAdventureResult,
+  applyCasinoResult,
+  applyEquipmentSelection,
+  applyForgeResult,
+  createStore,
+} from "./state.js";
 import { createUI } from "./ui.js";
 
 const store = createStore();
@@ -13,11 +20,9 @@ function save() {
 }
 
 function reset() {
-  const shouldReset = window.confirm("確定要清除目前進度並重置角色嗎？");
-  if (!shouldReset) {
+  if (!window.confirm("確定要清除目前進度並重置角色嗎？")) {
     return;
   }
-
   clearStorage();
   store.reset();
 }
@@ -29,83 +34,76 @@ function selectMap(mapId) {
   }));
 }
 
-function battle() {
-  const currentState = store.getState();
-  const result = runAutoBattle(currentState, currentState.selectedMapId);
-  store.setState((state) => applyBattleResult(state, result));
+function addAttribute(attributeKey) {
+  store.setState((state) => addAttributePoint(state, attributeKey));
 }
 
-function forge(slot, materials) {
+function adventure(mode) {
+  const result = runAdventure(store.getState(), mode);
+  store.setState((state) => applyAdventureResult(state, result));
+}
+
+function forge(type, name, materials) {
   const currentState = store.getState();
-  const capacity = getForgeCapacity(slot);
-
+  const capacity = getForgeCapacity(type);
   if (!capacity) {
-    window.alert("這個部位目前不能鍛造。");
+    window.alert("這個類型目前不能鍛造。");
     return;
   }
 
-  const chosenMaterials = materials.filter(Boolean).slice(0, capacity);
-  if (chosenMaterials.length === 0) {
-    window.alert("請至少選擇一個材料。");
+  const chosen = materials.filter(Boolean).slice(0, capacity);
+  if (chosen.length === 0) {
+    window.alert("請至少投入一個材料。");
     return;
   }
 
-  const requiredCounts = chosenMaterials.reduce((accumulator, materialId) => {
+  const required = chosen.reduce((accumulator, materialId) => {
     accumulator[materialId] = (accumulator[materialId] ?? 0) + 1;
     return accumulator;
   }, {});
 
-  const hasEnoughMaterials = Object.entries(requiredCounts).every(
+  const enough = Object.entries(required).every(
     ([materialId, count]) => (currentState.materials[materialId] ?? 0) >= count,
   );
 
-  if (!hasEnoughMaterials) {
-    window.alert("材料數量不足，無法完成這次鍛造。");
+  if (!enough) {
+    window.alert("材料不足，無法完成鍛造。");
     return;
   }
 
-  const forgedItem = calculateForgeResult(slot, chosenMaterials);
+  const forgedItem = calculateForgeResult(type, name, chosen, currentState.playerSeed);
   store.setState((state) => applyForgeResult(state, forgedItem));
 }
 
+function equip(selection) {
+  store.setState((state) => applyEquipmentSelection(state, selection));
+}
+
 function casino(gameKey, betAmount) {
-  const currentState = store.getState();
   const handlers = {
     dice: playDice,
     inBetween: playInBetween,
     coin: playCoin,
   };
 
-  const handler = handlers[gameKey];
-  if (!handler) {
-    return;
-  }
-
-  const result = handler(currentState.gold, betAmount);
-  if (!result.ok) {
-    window.alert(result.message ?? `無法進行 ${CASINO_GAMES[gameKey] ?? "賭局"}。`);
+  const result = handlers[gameKey]?.(store.getState().gold, betAmount);
+  if (!result?.ok) {
+    window.alert(result?.message ?? `無法進行 ${CASINO_GAMES[gameKey] ?? "賭局"}。`);
     return;
   }
 
   store.setState((state) => applyCasinoResult(state, result));
 }
 
-const actions = {
+createUI(store, {
   save,
   reset,
   selectMap,
-  battle,
+  addAttribute,
+  adventure,
   forge,
+  equip,
   casino,
-};
+});
 
-createUI(store, actions);
-
-// 頁面首次載入時，如果沒有存檔，createStore 會回傳預設狀態。
-// 這裡主動儲存一次，確保後續 GitHub Pages 重新整理仍可直接延續進度。
 store.save();
-
-window.__TEXT_RPG_DEBUG__ = {
-  store,
-  MATERIAL_DEFS,
-};

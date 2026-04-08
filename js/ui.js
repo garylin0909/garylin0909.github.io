@@ -1,48 +1,39 @@
 import {
-  CASINO_GAMES,
-  EQUIPMENT_SLOTS,
-  FORGEABLE_SLOTS,
-  MAPS,
+  ATTRIBUTE_KEYS,
+  ATTRIBUTE_LABELS,
+  EQUIP_SLOT_LABELS,
+  EQUIP_SLOTS,
+  FORGEABLE_TYPES,
   MATERIAL_DEFS,
+  MAPS,
+  RESOURCE_LABELS,
   SKILL_BOOKS,
+  SUBTYPE_COMPATIBILITY,
 } from "./data.js";
 import { calculateForgeResult, getForgeCapacity } from "./forge.js";
-
-const STAT_LABELS = {
-  level: "等級",
-  exp: "經驗",
-  hp: "生命值",
-  hpMax: "最大生命",
-  str: "力量",
-  vit: "耐力",
-  luck: "幸運",
-  dex: "靈巧",
-  agi: "敏捷",
-  gold: "金幣",
-};
-
-function formatStatValue(key, value) {
-  if (key === "hp") {
-    return `${value}`;
-  }
-
-  return String(value);
-}
 
 function createMaterialOptions(state) {
   return [
     `<option value="">不放入材料</option>`,
-    ...Object.entries(MATERIAL_DEFS).map(([id, material]) => {
-      const owned = state.materials[id] ?? 0;
-      return `<option value="${id}">${material.name} (${owned})</option>`;
-    }),
+    ...Object.entries(state.materials).map(
+      ([id, count]) => `<option value="${id}">${MATERIAL_DEFS[id]?.name ?? id} (${count})</option>`,
+    ),
   ].join("");
 }
 
 function getForgeSelection(documentRef) {
-  const slot = documentRef.querySelector("#forge-slot").value;
-  const materials = Array.from(documentRef.querySelectorAll(".forge-material")).map((select) => select.value);
-  return { slot, materials };
+  return {
+    type: documentRef.querySelector("#forge-slot").value,
+    name: documentRef.querySelector("#forge-name").value,
+    materials: Array.from(documentRef.querySelectorAll(".forge-material")).map((select) => select.value),
+  };
+}
+
+function renderItemStats(item) {
+  if (!item?.stats) {
+    return "未裝備";
+  }
+  return `攻擊 ${item.stats.atk} / 防禦 ${item.stats.def} / 幸運 ${item.stats.luck} / 耐久 ${item.stats.durability}`;
 }
 
 export function createUI(store, actions) {
@@ -58,53 +49,62 @@ export function createUI(store, actions) {
     });
   }
 
-  function renderQuickStats(state) {
-    const container = root.querySelector("#hero-quick-stats");
-    container.innerHTML = [
-      { label: "等級", value: state.level },
-      { label: "HP", value: `${state.hp}/${state.hpMax}` },
-      { label: "力量", value: state.str },
-      { label: "敏捷", value: state.agi },
-      { label: "金幣", value: state.gold },
+  function renderResourceBar(state) {
+    root.querySelector("#resource-bar").innerHTML = ["level", "exp", "gold"]
+      .map((key) => {
+        const value = key === "exp" ? `${state.exp} / ${state.expToNext}` : state[key];
+        return `
+          <div class="resource-chip">
+            <span>${RESOURCE_LABELS[key]}</span>
+            <strong>${value}</strong>
+          </div>
+        `;
+      })
+      .join("");
+  }
+
+  function renderState(state) {
+    root.querySelector("#state-grid").innerHTML = [
+      { label: "玩家識別", value: state.playerSeed.slice(0, 8) },
+      { label: "探索地圖", value: MAPS.find((map) => map.id === state.selectedMapId)?.name ?? "-" },
+      { label: "目前樓層", value: state.mapProgress[state.selectedMapId].floor },
+      { label: "已學技能數", value: state.skills.length },
     ]
       .map(
         (item) => `
-          <div class="quick-card">
+          <div class="stat-card">
             <span>${item.label}</span>
             <strong>${item.value}</strong>
           </div>
         `,
       )
       .join("");
-  }
 
-  function renderState(state) {
-    const stateGrid = root.querySelector("#state-grid");
-    const skillList = root.querySelector("#skill-list");
-    const entries = ["level", "exp", "hp", "hpMax", "str", "vit", "luck", "dex", "agi", "gold"];
-
-    stateGrid.innerHTML = entries
-      .map(
-        (key) => `
-          <div class="stat-card">
-            <span>${STAT_LABELS[key]}</span>
-            <strong>${formatStatValue(key, state[key])}</strong>
+    root.querySelector("#attribute-points").textContent = `未分配能力點：${state.attributePoints}`;
+    root.querySelector("#attribute-grid").innerHTML = ATTRIBUTE_KEYS.map(
+      (key) => `
+        <div class="attribute-card">
+          <div class="attribute-row">
+            <div>
+              <span>${ATTRIBUTE_LABELS[key]}</span>
+              <strong class="attribute-value">${state.attributes[key]}</strong>
+            </div>
+            <div class="attribute-actions">
+              <button class="attribute-button" data-attribute="${key}">+1</button>
+            </div>
           </div>
-        `,
-      )
-      .join("");
+        </div>
+      `,
+    ).join("");
 
-    skillList.innerHTML =
+    root.querySelector("#skill-list").innerHTML =
       state.skills.length > 0
         ? state.skills.map((skillId) => `<span class="tag">${SKILL_BOOKS[skillId].name}</span>`).join("")
         : `<span class="tag">尚未學會技能</span>`;
   }
 
   function renderMaps(state) {
-    const mapList = root.querySelector("#map-list");
-    const encounterCard = root.querySelector("#encounter-card");
-
-    mapList.innerHTML = MAPS.map(
+    root.querySelector("#map-list").innerHTML = MAPS.map(
       (map) => `
         <button class="map-card ${map.id === state.selectedMapId ? "is-selected" : ""}" data-map-id="${map.id}">
           <strong>${map.name}</strong>
@@ -114,28 +114,30 @@ export function createUI(store, actions) {
     ).join("");
 
     const currentMap = MAPS.find((map) => map.id === state.selectedMapId) ?? MAPS[0];
-    encounterCard.innerHTML = `
+    const floor = state.mapProgress[currentMap.id].floor;
+    const isBossFloor = floor % 25 === 0;
+
+    root.querySelector("#encounter-card").innerHTML = `
       <div class="map-card is-selected">
         <strong>${currentMap.name}</strong>
-        <p>${currentMap.description}</p>
-        <p>此地圖沒有等級限制，按下戰鬥即可自動遭遇敵人。</p>
+        <p>目前位於第 ${floor} 層 / 最高可達 1000 層。</p>
+        <p>${isBossFloor ? "本層為 Boss 層，戰鬥強度顯著提高。" : "一般樓層，可選擇刷怪或快速趕路。"}</p>
+        <p>戰鬥上樓率較低，趕路上樓率較高。</p>
       </div>
     `;
   }
 
   function renderBattleLog(state) {
-    const battleLog = root.querySelector("#battle-log");
-    battleLog.innerHTML = state.logs.battle
+    root.querySelector("#battle-log").innerHTML = state.logs.battle
       .map((line) => {
         let className = "log-line";
-        if (line.includes("擊敗") || line.includes("獲得") || line.includes("掉落")) {
+        if (line.includes("獲得") || line.includes("掉落") || line.includes("推進")) {
           className += " log-good";
-        } else if (line.includes("反擊") || line.includes("撤退")) {
+        } else if (line.includes("撤退") || line.includes("造成")) {
           className += " log-bad";
-        } else if (line.includes("施放")) {
+        } else if (line.includes("施放") || line.includes("Boss")) {
           className += " log-special";
         }
-
         return `<p class="${className}">${line}</p>`;
       })
       .join("");
@@ -144,27 +146,23 @@ export function createUI(store, actions) {
   function renderForge(state) {
     const slotSelect = root.querySelector("#forge-slot");
     const materialSelects = Array.from(root.querySelectorAll(".forge-material"));
-    const preview = root.querySelector("#forge-preview");
 
-    if (!slotSelect.dataset.initialized) {
-      slotSelect.innerHTML = Object.entries(FORGEABLE_SLOTS)
-        .map(([slot, capacity]) => `<option value="${slot}">${slot} (${capacity} 格)</option>`)
+    if (!slotSelect.dataset.ready) {
+      slotSelect.innerHTML = Object.entries(FORGEABLE_TYPES)
+        .map(([key, value]) => `<option value="${key}">${value.label} (${value.materialLimit} 格)</option>`)
         .join("");
-      slotSelect.dataset.initialized = "true";
+      slotSelect.dataset.ready = "true";
     }
 
     const materialOptions = createMaterialOptions(state);
     materialSelects.forEach((select) => {
       const currentValue = select.value;
       select.innerHTML = materialOptions;
-      if (currentValue) {
-        select.value = currentValue;
-      }
+      select.value = currentValue;
     });
 
-    const { slot, materials } = getForgeSelection(root);
-    const capacity = getForgeCapacity(slot);
-
+    const forgeState = getForgeSelection(root);
+    const capacity = getForgeCapacity(forgeState.type);
     materialSelects.forEach((select, index) => {
       select.disabled = index >= capacity;
       if (index >= capacity) {
@@ -172,55 +170,83 @@ export function createUI(store, actions) {
       }
     });
 
-    const forged = calculateForgeResult(slot, materials);
-    const statRows = Object.entries(forged.stats).length
-      ? Object.entries(forged.stats)
-          .map(([stat, value]) => `<p>${STAT_LABELS[stat] ?? stat} +${value}</p>`)
-          .join("")
-      : "<p>請先投入至少一個材料。</p>";
-    const synergyRows =
-      forged.synergies.length > 0
-        ? forged.synergies.map((line) => `<p class="log-special">${line}</p>`).join("")
-        : "<p>目前沒有觸發材料連動。</p>";
+    const preview = calculateForgeResult(
+      forgeState.type,
+      forgeState.name,
+      forgeState.materials,
+      state.playerSeed,
+    );
 
-    preview.innerHTML = `
-      <p><strong>名稱：</strong>${forged.name}</p>
-      <p><strong>部位：</strong>${forged.slot}</p>
-      <p><strong>材料上限：</strong>${capacity}</p>
-      <div>${statRows}</div>
-      <div>${synergyRows}</div>
+    root.querySelector("#forge-preview").innerHTML = `
+      <p><strong>名稱：</strong>${preview.name}</p>
+      <p><strong>類型：</strong>${FORGEABLE_TYPES[forgeState.type].label}</p>
+      <p><strong>攻擊：</strong>${preview.stats.atk}</p>
+      <p><strong>防禦：</strong>${preview.stats.def}</p>
+      <p><strong>幸運：</strong>${preview.stats.luck}</p>
+      <p><strong>耐久：</strong>${preview.stats.durability}</p>
     `;
   }
 
   function renderEquipment(state) {
-    const grid = root.querySelector("#equipment-grid");
-    grid.innerHTML = EQUIPMENT_SLOTS.map((slot) => {
-      const item = state.equipment[slot];
-      const statText = item?.stats
-        ? Object.entries(item.stats)
-            .map(([stat, value]) => `${STAT_LABELS[stat] ?? stat} +${value}`)
-            .join(" / ")
-        : "尚未裝備";
-      const extra = item?.synergies?.length ? `連動：${item.synergies.join("、")}` : "無連動效果";
+    const selects = {
+      main: root.querySelector("#equip-main"),
+      sub: root.querySelector("#equip-sub"),
+      armor: root.querySelector("#equip-armor"),
+      helmet: root.querySelector("#equip-helmet"),
+      ring: root.querySelector("#equip-ring"),
+    };
 
-      return `
+    const itemsBySlot = Object.fromEntries(
+      EQUIP_SLOTS.map((slot) => [slot, state.inventory.filter((item) => item.slot === slot)]),
+    );
+
+    const selectedMainSubtype = selects.main.value
+      ? state.inventory.find((item) => item.id === selects.main.value)?.subtype ?? null
+      : state.equipped.main?.subtype ?? null;
+    const allowedSubs = selectedMainSubtype ? SUBTYPE_COMPATIBILITY[selectedMainSubtype] ?? [] : [];
+
+    selects.main.innerHTML =
+      `<option value="">不裝備</option>` +
+      itemsBySlot.main
+        .map((item) => `<option value="${item.id}">${item.name}</option>`)
+        .join("");
+    selects.main.value = state.equipped.main?.id ?? "";
+
+    selects.sub.innerHTML =
+      `<option value="">不裝備</option>` +
+      itemsBySlot.sub
+        .filter((item) => allowedSubs.includes(item.subtype))
+        .map((item) => `<option value="${item.id}">${item.name}</option>`)
+        .join("");
+    selects.sub.disabled = allowedSubs.length === 0;
+    selects.sub.value = allowedSubs.includes(state.equipped.sub?.subtype) ? state.equipped.sub?.id ?? "" : "";
+
+    ["armor", "helmet", "ring"].forEach((slot) => {
+      selects[slot].innerHTML =
+        `<option value="">不裝備</option>` +
+        itemsBySlot[slot].map((item) => `<option value="${item.id}">${item.name}</option>`).join("");
+      selects[slot].value = state.equipped[slot]?.id ?? "";
+    });
+
+    root.querySelector("#equipment-grid").innerHTML = EQUIP_SLOTS.map(
+      (slot) => `
         <div class="equipment-card">
-          <span>${slot}</span>
-          <strong>${item?.name ?? "空槽"}</strong>
-          <p>${statText}</p>
-          <p>${extra}</p>
+          <span>${EQUIP_SLOT_LABELS[slot]}</span>
+          <strong>${state.equipped[slot]?.name ?? "未裝備"}</strong>
+          <p>${renderItemStats(state.equipped[slot])}</p>
         </div>
-      `;
-    }).join("");
+      `,
+    ).join("");
   }
 
   function renderCasino(state) {
-    const log = root.querySelector("#casino-log");
-    log.innerHTML = state.logs.casino.map((line) => `<p class="log-line">${line}</p>`).join("");
+    root.querySelector("#casino-log").innerHTML = state.logs.casino
+      .map((line) => `<p class="log-line">${line}</p>`)
+      .join("");
   }
 
   function renderAll(state) {
-    renderQuickStats(state);
+    renderResourceBar(state);
     renderState(state);
     renderMaps(state);
     renderBattleLog(state);
@@ -236,15 +262,20 @@ export function createUI(store, actions) {
 
     root.querySelector("#save-button").addEventListener("click", actions.save);
     root.querySelector("#reset-button").addEventListener("click", actions.reset);
-    root.querySelector("#battle-button").addEventListener("click", actions.battle);
+    root.querySelector("#battle-button").addEventListener("click", () => actions.adventure("battle"));
+    root.querySelector("#travel-button").addEventListener("click", () => actions.adventure("travel"));
     root.querySelector("#forge-button").addEventListener("click", () => {
-      const { slot, materials } = getForgeSelection(root);
-      actions.forge(slot, materials);
+      const forgeSelection = getForgeSelection(root);
+      actions.forge(forgeSelection.type, forgeSelection.name, forgeSelection.materials);
     });
-
-    root.querySelector("#forge-slot").addEventListener("change", () => renderForge(store.getState()));
-    root.querySelectorAll(".forge-material").forEach((select) => {
-      select.addEventListener("change", () => renderForge(store.getState()));
+    root.querySelector("#equip-button").addEventListener("click", () => {
+      actions.equip({
+        main: root.querySelector("#equip-main").value,
+        sub: root.querySelector("#equip-sub").value,
+        armor: root.querySelector("#equip-armor").value,
+        helmet: root.querySelector("#equip-helmet").value,
+        ring: root.querySelector("#equip-ring").value,
+      });
     });
 
     root.querySelector("#map-list").addEventListener("click", (event) => {
@@ -252,14 +283,28 @@ export function createUI(store, actions) {
       if (!button) {
         return;
       }
-
       actions.selectMap(button.dataset.mapId);
     });
 
+    root.querySelector("#attribute-grid").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-attribute]");
+      if (!button) {
+        return;
+      }
+      actions.addAttribute(button.dataset.attribute);
+    });
+
+    root.querySelector("#forge-slot").addEventListener("change", () => renderForge(store.getState()));
+    root.querySelector("#forge-name").addEventListener("input", () => renderForge(store.getState()));
+    root.querySelectorAll(".forge-material").forEach((select) => {
+      select.addEventListener("change", () => renderForge(store.getState()));
+    });
+
+    root.querySelector("#equip-main").addEventListener("change", () => renderEquipment(store.getState()));
+
     root.querySelectorAll(".casino-button").forEach((button) => {
       button.addEventListener("click", () => {
-        const bet = Number(root.querySelector("#bet-amount").value);
-        actions.casino(button.dataset.game, bet);
+        actions.casino(button.dataset.game, Number(root.querySelector("#bet-amount").value));
       });
     });
   }
@@ -267,14 +312,4 @@ export function createUI(store, actions) {
   store.subscribe(renderAll);
   bindEvents();
   setActiveView("state");
-
-  return {
-    refreshForgePreview() {
-      renderForge(store.getState());
-    },
-  };
-}
-
-export function createCasinoMessage(gameKey) {
-  return CASINO_GAMES[gameKey] ?? "未知賭局";
 }
