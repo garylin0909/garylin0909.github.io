@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <div class="resource-bar panel">
+    <div class="resource-bar">
       <div class="resource-list" id="resource-bar"></div>
     </div>
 
@@ -21,8 +21,8 @@
       <header class="topbar panel">
         <div class="brand-block">
           <p class="eyebrow">GitHub Pages Text RPG</p>
-          <h1>夜鐵文域</h1>
-          <p class="subtitle">黑市、鍛造與樓層探索交織的純文字 RPG。</p>
+          <h1 id="player-title">旅人</h1>
+          <p class="subtitle">樓層探索、鍛造與賭局交織的純文字 RPG。</p>
         </div>
         <nav class="navbar" aria-label="主選單">
           <button class="nav-tab is-active" data-view="state">狀態</button>
@@ -42,8 +42,8 @@
                 <h2>角色狀態</h2>
               </div>
               <div class="toolbar">
-                <button id="save-button" class="btn btn-primary">手動存檔</button>
-                <button id="reset-button" class="btn btn-ghost">重置進度</button>
+                <button id="save-button" class="btn btn-primary">產生存檔文字</button>
+                <button id="copy-save-button" class="btn btn-secondary">複製存檔</button>
               </div>
             </div>
 
@@ -57,6 +57,11 @@
                 <p id="attribute-points" class="muted-line"></p>
                 <div class="attribute-grid" id="attribute-grid"></div>
               </div>
+            </div>
+
+            <div class="panel stack">
+              <h3>存檔文字</h3>
+              <textarea id="save-output" class="save-output" readonly placeholder="按下「產生存檔文字」後，這裡會出現 JSON 存檔。"></textarea>
             </div>
 
             <div class="panel stack">
@@ -102,7 +107,7 @@
               </div>
             </div>
 
-            <div class="forge-grid">
+            <div class="forge-grid single-column">
               <div class="panel stack">
                 <h3>鍛造設定</h3>
                 <label class="field">
@@ -110,8 +115,8 @@
                   <select id="forge-slot"></select>
                 </label>
                 <label class="field">
-                  <span>自訂名稱</span>
-                  <input id="forge-name" type="text" maxlength="18" placeholder="輸入武器或裝備名稱" />
+                  <span>裝備名稱</span>
+                  <input id="forge-name" type="text" maxlength="18" placeholder="未命名裝備無法製作" />
                 </label>
                 <label class="field">
                   <span>材料 1</span>
@@ -130,10 +135,6 @@
                   <select class="forge-material" data-index="3"></select>
                 </label>
                 <button id="forge-button" class="btn btn-primary">開始鍛造</button>
-              </div>
-              <div class="panel stack">
-                <h3>鍛造成果預覽</h3>
-                <div id="forge-preview" class="stack compact"></div>
               </div>
             </div>
           </article>
@@ -185,6 +186,7 @@
                 <h2>黑市賭場</h2>
               </div>
             </div>
+
             <div class="casino-grid">
               <div class="panel stack">
                 <label class="field">
@@ -196,6 +198,7 @@
                   <button class="btn btn-primary casino-button" data-game="inBetween">射龍門</button>
                   <button class="btn btn-primary casino-button" data-game="coin">猜正反</button>
                 </div>
+                <div id="casino-controls" class="casino-controls"></div>
               </div>
               <div class="panel stack">
                 <h3>賭局紀錄</h3>

@@ -17,7 +17,7 @@ function normalizeBet(playerGold, betAmount) {
   }
 
   if (bet > playerGold) {
-    return { ok: false, message: "金幣不足，無法下注這個金額。" };
+    return { ok: false, message: "金幣不足，無法進行這次下注。" };
   }
 
   return { ok: true, bet };
@@ -51,11 +51,11 @@ export function playDice(playerGold, betAmount) {
   return {
     ok: true,
     deltaGold: 0,
-    lines: [`你擲出 ${player}，莊家擲出 ${dealer}。`, "平手，本局不計輸贏。"],
+    lines: [`你擲出 ${player}，莊家擲出 ${dealer}。`, "平手，這局不計輸贏。"],
   };
 }
 
-export function playInBetween(playerGold, betAmount) {
+export function setupInBetween(playerGold, betAmount) {
   const validated = normalizeBet(playerGold, betAmount);
   if (!validated.ok) {
     return validated;
@@ -63,28 +63,60 @@ export function playInBetween(playerGold, betAmount) {
 
   const first = drawCard();
   const second = drawCard();
-  const third = drawCard();
   const low = Math.min(first, second);
   const high = Math.max(first, second);
-  const win = third > low && third < high;
 
   return {
     ok: true,
-    deltaGold: win ? Math.round(validated.bet * 1.5) : -validated.bet,
-    lines: [
-      `前兩張牌為 ${first} 與 ${second}，第三張翻出 ${third}。`,
-      win ? `命中區間，你贏得 ${Math.round(validated.bet * 1.5)} 金幣。` : `未落在區間內，失去 ${validated.bet} 金幣。`,
-    ],
+    pending: true,
+    game: "inBetween",
+    bet: validated.bet,
+    payload: { first, second, low, high },
+    lines: [`前兩張牌是 ${first} 和 ${second}。`, "請選擇要賭第三張牌「大」還是「小」。"],
   };
 }
 
-export function playCoin(playerGold, betAmount) {
+export function resolveInBetween(playerGold, betAmount, guess, payload) {
   const validated = normalizeBet(playerGold, betAmount);
   if (!validated.ok) {
     return validated;
   }
 
-  const guess = Math.random() < 0.5 ? "正面" : "反面";
+  const third = drawCard();
+  const win = guess === "big" ? third > payload.high : third < payload.low;
+
+  return {
+    ok: true,
+    deltaGold: win ? validated.bet : -validated.bet,
+    lines: [
+      `前兩張牌是 ${payload.first} 和 ${payload.second}，你選擇賭${guess === "big" ? "大" : "小"}。`,
+      `第三張牌翻出 ${third}。`,
+      win ? `你猜中了，贏得 ${validated.bet} 金幣。` : `沒有猜中，失去 ${validated.bet} 金幣。`,
+    ],
+  };
+}
+
+export function setupCoin(playerGold, betAmount) {
+  const validated = normalizeBet(playerGold, betAmount);
+  if (!validated.ok) {
+    return validated;
+  }
+
+  return {
+    ok: true,
+    pending: true,
+    game: "coin",
+    bet: validated.bet,
+    lines: ["請先選擇要猜正面還是反面。"],
+  };
+}
+
+export function resolveCoin(playerGold, betAmount, guess) {
+  const validated = normalizeBet(playerGold, betAmount);
+  if (!validated.ok) {
+    return validated;
+  }
+
   const result = flipCoin();
   const win = guess === result;
 
@@ -92,8 +124,9 @@ export function playCoin(playerGold, betAmount) {
     ok: true,
     deltaGold: win ? validated.bet : -validated.bet,
     lines: [
-      `你押 ${guess}，硬幣結果是 ${result}。`,
-      win ? `猜中了，贏得 ${validated.bet} 金幣。` : `沒猜中，失去 ${validated.bet} 金幣。`,
+      `你選擇 ${guess}。`,
+      `硬幣結果是 ${result}。`,
+      win ? `你猜中了，贏得 ${validated.bet} 金幣。` : `你沒猜中，失去 ${validated.bet} 金幣。`,
     ],
   };
 }

@@ -27,7 +27,8 @@ body {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -48,34 +49,33 @@ a {
   position: sticky;
   top: 0;
   z-index: 20;
-  width: min(1200px, calc(100% - 32px));
-  margin: 16px auto 0;
-  padding: 12px 18px;
+  height: 5vh;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0 16px;
+  background: rgba(5, 9, 17, 0.9);
+  border-bottom: 1px solid rgba(151, 175, 216, 0.16);
 }
 
 .resource-list {
+  width: min(1200px, 100%);
+  margin: 0 auto;
   display: flex;
-  gap: 12px;
+  gap: 20px;
+  align-items: center;
   flex-wrap: wrap;
 }
 
-.resource-chip {
-  min-width: 110px;
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.resource-chip span {
-  display: block;
-  font-size: 0.78rem;
+.resource-inline {
   color: var(--muted);
+  font-size: 0.92rem;
 }
 
-.resource-chip strong {
-  display: block;
-  margin-top: 4px;
+.resource-inline strong {
+  color: var(--text);
+  margin-left: 6px;
 }
 
 .app-shell {
@@ -116,7 +116,8 @@ a {
 
 .navbar,
 .toolbar,
-.game-buttons {
+.game-buttons,
+.casino-controls {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -151,16 +152,6 @@ a {
   font-weight: 700;
 }
 
-.btn-ghost {
-  background: transparent;
-  border-color: rgba(255, 255, 255, 0.14);
-}
-
-.btn-ghost:hover {
-  border-color: rgba(255, 141, 141, 0.4);
-  color: var(--danger);
-}
-
 .btn:hover,
 .attribute-button:hover {
   transform: translateY(-1px);
@@ -192,19 +183,19 @@ a {
   gap: 12px;
 }
 
-.compact {
-  gap: 8px;
-}
-
 .state-layout,
 .adventure-grid,
-.forge-grid,
 .equipment-layout,
 .casino-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   margin-bottom: 18px;
+}
+
+.single-column {
+  display: grid;
+  grid-template-columns: 1fr;
 }
 
 .stat-grid,
@@ -249,11 +240,6 @@ a {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-}
-
-.attribute-actions {
-  display: flex;
-  gap: 8px;
 }
 
 .attribute-button {
@@ -304,13 +290,19 @@ a {
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 14px;
   background: rgba(0, 0, 0, 0.24);
   color: var(--text);
   padding: 12px 14px;
+}
+
+.save-output {
+  min-height: 180px;
+  resize: vertical;
 }
 
 .battle-log {
@@ -360,9 +352,14 @@ select {
 
   .state-layout,
   .adventure-grid,
-  .forge-grid,
   .equipment-layout,
   .casino-grid {
     grid-template-columns: 1fr;
+  }
+
+  .resource-bar {
+    height: auto;
+    padding-top: 10px;
+    padding-bottom: 10px;
   }
 }

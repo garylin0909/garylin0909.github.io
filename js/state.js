@@ -18,7 +18,7 @@ function buildInventory() {
 function buildEquipped() {
   return {
     main: null,
-    sub: STARTER_ITEMS.find((item) => item.id === "starter-shield") ?? null,
+    sub: null,
     armor: null,
     helmet: STARTER_ITEMS.find((item) => item.id === "starter-helmet") ?? null,
     ring: STARTER_ITEMS.find((item) => item.id === "starter-ring") ?? null,
@@ -27,6 +27,7 @@ function buildEquipped() {
 
 export function createDefaultState() {
   return {
+    nickname: "",
     playerSeed: crypto.randomUUID(),
     level: 1,
     exp: 0,
@@ -53,6 +54,7 @@ export function createDefaultState() {
     equipped: buildEquipped(),
     selectedMapId: MAPS[0].id,
     mapProgress: buildMapProgress(),
+    saveText: "",
     logs: {
       battle: ["系統準備完成，選擇地圖後即可戰鬥或趕路。"],
       casino: ["黑市賭場已開門，輸贏全看運氣。"],
@@ -72,6 +74,7 @@ function mergeLoadedState(loadedState) {
     equipped: { ...base.equipped, ...(loadedState?.equipped ?? {}) },
     mapProgress: { ...base.mapProgress, ...(loadedState?.mapProgress ?? {}) },
     logs: { ...base.logs, ...(loadedState?.logs ?? {}) },
+    saveText: typeof loadedState?.saveText === "string" ? loadedState.saveText : "",
   };
 }
 
@@ -103,15 +106,24 @@ export function createStore() {
       }
       notify();
     },
-    reset() {
-      state = createDefaultState();
-      persist();
-      notify();
-    },
     save() {
       persist();
       notify();
     },
+  };
+}
+
+export function setNickname(state, nickname) {
+  return {
+    ...state,
+    nickname: nickname.trim(),
+  };
+}
+
+export function setSaveText(state, saveText) {
+  return {
+    ...state,
+    saveText,
   };
 }
 
@@ -131,7 +143,6 @@ export function gainRewards(state, rewards) {
   nextState.exp += rewards.exp ?? 0;
   nextState.gold += rewards.gold ?? 0;
 
-  // 升級改成只增加可分配點數，讓玩家自由養成五項能力值。
   while (nextState.exp >= nextState.expToNext) {
     nextState.exp -= nextState.expToNext;
     nextState.level += 1;
@@ -147,29 +158,31 @@ export function applyAdventureResult(state, adventureResult) {
   nextState.logs.battle = adventureResult.logs;
   const currentMap = nextState.selectedMapId;
 
-  if (!adventureResult.victory && adventureResult.mode === "travel" && adventureResult.climbed > 0) {
-    nextState.mapProgress[currentMap].floor = Math.min(1000, nextState.mapProgress[currentMap].floor + adventureResult.climbed);
-    return nextState;
+  if (adventureResult.victory) {
+    const rewarded = gainRewards(nextState, adventureResult.rewards);
+    rewarded.mapProgress[currentMap].floor = Math.min(
+      1000,
+      rewarded.mapProgress[currentMap].floor + adventureResult.climbed,
+    );
+
+    adventureResult.rewards.drops.forEach((drop) => {
+      if (drop.type === "material") {
+        rewarded.materials[drop.id] = (rewarded.materials[drop.id] ?? 0) + 1;
+      }
+
+      if (drop.type === "skill" && !rewarded.skills.includes(drop.id)) {
+        rewarded.skills.push(drop.id);
+      }
+    });
+
+    return rewarded;
   }
 
-  if (!adventureResult.victory) {
-    return nextState;
-  }
-
-  const rewarded = gainRewards(nextState, adventureResult.rewards);
-  rewarded.mapProgress[currentMap].floor = Math.min(1000, rewarded.mapProgress[currentMap].floor + adventureResult.climbed);
-
-  adventureResult.rewards.drops.forEach((drop) => {
-    if (drop.type === "material") {
-      rewarded.materials[drop.id] = (rewarded.materials[drop.id] ?? 0) + 1;
-    }
-
-    if (drop.type === "skill" && !rewarded.skills.includes(drop.id)) {
-      rewarded.skills.push(drop.id);
-    }
-  });
-
-  return rewarded;
+  nextState.mapProgress[currentMap].floor = Math.min(
+    1000,
+    nextState.mapProgress[currentMap].floor + adventureResult.climbed,
+  );
+  return nextState;
 }
 
 export function applyForgeResult(state, forgedItem) {

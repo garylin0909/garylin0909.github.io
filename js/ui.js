@@ -10,7 +10,6 @@ import {
   SKILL_BOOKS,
   SUBTYPE_COMPATIBILITY,
 } from "./data.js";
-import { calculateForgeResult, getForgeCapacity } from "./forge.js";
 
 function createMaterialOptions(state) {
   return [
@@ -24,7 +23,7 @@ function createMaterialOptions(state) {
 function getForgeSelection(documentRef) {
   return {
     type: documentRef.querySelector("#forge-slot").value,
-    name: documentRef.querySelector("#forge-name").value,
+    name: documentRef.querySelector("#forge-name").value.trim(),
     materials: Array.from(documentRef.querySelectorAll(".forge-material")).map((select) => select.value),
   };
 }
@@ -33,11 +32,13 @@ function renderItemStats(item) {
   if (!item?.stats) {
     return "未裝備";
   }
+
   return `攻擊 ${item.stats.atk} / 防禦 ${item.stats.def} / 幸運 ${item.stats.luck} / 耐久 ${item.stats.durability}`;
 }
 
 export function createUI(store, actions) {
   const root = document;
+  let casinoState = null;
 
   function setActiveView(viewId) {
     root.querySelectorAll(".nav-tab").forEach((button) => {
@@ -53,19 +54,15 @@ export function createUI(store, actions) {
     root.querySelector("#resource-bar").innerHTML = ["level", "exp", "gold"]
       .map((key) => {
         const value = key === "exp" ? `${state.exp} / ${state.expToNext}` : state[key];
-        return `
-          <div class="resource-chip">
-            <span>${RESOURCE_LABELS[key]}</span>
-            <strong>${value}</strong>
-          </div>
-        `;
+        return `<div class="resource-inline">${RESOURCE_LABELS[key]}<strong>${value}</strong></div>`;
       })
       .join("");
   }
 
   function renderState(state) {
+    root.querySelector("#player-title").textContent = state.nickname || "旅人";
     root.querySelector("#state-grid").innerHTML = [
-      { label: "玩家識別", value: state.playerSeed.slice(0, 8) },
+      { label: "暱稱", value: state.nickname || "旅人" },
       { label: "探索地圖", value: MAPS.find((map) => map.id === state.selectedMapId)?.name ?? "-" },
       { label: "目前樓層", value: state.mapProgress[state.selectedMapId].floor },
       { label: "已學技能數", value: state.skills.length },
@@ -89,14 +86,13 @@ export function createUI(store, actions) {
               <span>${ATTRIBUTE_LABELS[key]}</span>
               <strong class="attribute-value">${state.attributes[key]}</strong>
             </div>
-            <div class="attribute-actions">
-              <button class="attribute-button" data-attribute="${key}">+1</button>
-            </div>
+            <button class="attribute-button" data-attribute="${key}">+1</button>
           </div>
         </div>
       `,
     ).join("");
 
+    root.querySelector("#save-output").value = state.saveText ?? "";
     root.querySelector("#skill-list").innerHTML =
       state.skills.length > 0
         ? state.skills.map((skillId) => `<span class="tag">${SKILL_BOOKS[skillId].name}</span>`).join("")
@@ -121,8 +117,8 @@ export function createUI(store, actions) {
       <div class="map-card is-selected">
         <strong>${currentMap.name}</strong>
         <p>目前位於第 ${floor} 層 / 最高可達 1000 層。</p>
-        <p>${isBossFloor ? "本層為 Boss 層，戰鬥強度顯著提高。" : "一般樓層，可選擇刷怪或快速趕路。"}</p>
-        <p>戰鬥上樓率較低，趕路上樓率較高。</p>
+        <p>${isBossFloor ? "本層為 Boss 層，戰鬥強度顯著提高。" : "一般樓層，可選擇刷怪或趕路。"}</p>
+        <p>戰鬥前進率 7.5%，趕路前進率 85%。</p>
       </div>
     `;
   }
@@ -131,7 +127,7 @@ export function createUI(store, actions) {
     root.querySelector("#battle-log").innerHTML = state.logs.battle
       .map((line) => {
         let className = "log-line";
-        if (line.includes("獲得") || line.includes("掉落") || line.includes("推進")) {
+        if (line.includes("獲得") || line.includes("掉落") || line.includes("前進")) {
           className += " log-good";
         } else if (line.includes("撤退") || line.includes("造成")) {
           className += " log-bad";
@@ -162,32 +158,16 @@ export function createUI(store, actions) {
     });
 
     const forgeState = getForgeSelection(root);
-    const capacity = getForgeCapacity(forgeState.type);
+    const capacity = FORGEABLE_TYPES[forgeState.type]?.materialLimit ?? 0;
     materialSelects.forEach((select, index) => {
       select.disabled = index >= capacity;
       if (index >= capacity) {
         select.value = "";
       }
     });
-
-    const preview = calculateForgeResult(
-      forgeState.type,
-      forgeState.name,
-      forgeState.materials,
-      state.playerSeed,
-    );
-
-    root.querySelector("#forge-preview").innerHTML = `
-      <p><strong>名稱：</strong>${preview.name}</p>
-      <p><strong>類型：</strong>${FORGEABLE_TYPES[forgeState.type].label}</p>
-      <p><strong>攻擊：</strong>${preview.stats.atk}</p>
-      <p><strong>防禦：</strong>${preview.stats.def}</p>
-      <p><strong>幸運：</strong>${preview.stats.luck}</p>
-      <p><strong>耐久：</strong>${preview.stats.durability}</p>
-    `;
   }
 
-  function renderEquipment(state) {
+  function updateEquipmentForm(state, selectionOverride = null) {
     const selects = {
       main: root.querySelector("#equip-main"),
       sub: root.querySelector("#equip-sub"),
@@ -196,21 +176,26 @@ export function createUI(store, actions) {
       ring: root.querySelector("#equip-ring"),
     };
 
+    const currentSelection =
+      selectionOverride ?? {
+        main: state.equipped.main?.id ?? "",
+        sub: state.equipped.sub?.id ?? "",
+        armor: state.equipped.armor?.id ?? "",
+        helmet: state.equipped.helmet?.id ?? "",
+        ring: state.equipped.ring?.id ?? "",
+      };
+
     const itemsBySlot = Object.fromEntries(
       EQUIP_SLOTS.map((slot) => [slot, state.inventory.filter((item) => item.slot === slot)]),
     );
 
-    const selectedMainSubtype = selects.main.value
-      ? state.inventory.find((item) => item.id === selects.main.value)?.subtype ?? null
-      : state.equipped.main?.subtype ?? null;
-    const allowedSubs = selectedMainSubtype ? SUBTYPE_COMPATIBILITY[selectedMainSubtype] ?? [] : [];
-
     selects.main.innerHTML =
       `<option value="">不裝備</option>` +
-      itemsBySlot.main
-        .map((item) => `<option value="${item.id}">${item.name}</option>`)
-        .join("");
-    selects.main.value = state.equipped.main?.id ?? "";
+      itemsBySlot.main.map((item) => `<option value="${item.id}">${item.name}</option>`).join("");
+    selects.main.value = currentSelection.main;
+
+    const selectedMainSubtype = state.inventory.find((item) => item.id === currentSelection.main)?.subtype ?? null;
+    const allowedSubs = selectedMainSubtype ? SUBTYPE_COMPATIBILITY[selectedMainSubtype] ?? [] : [];
 
     selects.sub.innerHTML =
       `<option value="">不裝備</option>` +
@@ -219,15 +204,20 @@ export function createUI(store, actions) {
         .map((item) => `<option value="${item.id}">${item.name}</option>`)
         .join("");
     selects.sub.disabled = allowedSubs.length === 0;
-    selects.sub.value = allowedSubs.includes(state.equipped.sub?.subtype) ? state.equipped.sub?.id ?? "" : "";
+    selects.sub.value = allowedSubs.includes(state.inventory.find((item) => item.id === currentSelection.sub)?.subtype)
+      ? currentSelection.sub
+      : "";
 
     ["armor", "helmet", "ring"].forEach((slot) => {
       selects[slot].innerHTML =
         `<option value="">不裝備</option>` +
         itemsBySlot[slot].map((item) => `<option value="${item.id}">${item.name}</option>`).join("");
-      selects[slot].value = state.equipped[slot]?.id ?? "";
+      selects[slot].value = currentSelection[slot];
     });
+  }
 
+  function renderEquipment(state) {
+    updateEquipmentForm(state);
     root.querySelector("#equipment-grid").innerHTML = EQUIP_SLOTS.map(
       (slot) => `
         <div class="equipment-card">
@@ -239,10 +229,35 @@ export function createUI(store, actions) {
     ).join("");
   }
 
+  function renderCasinoControls() {
+    const container = root.querySelector("#casino-controls");
+
+    if (!casinoState?.pending) {
+      container.innerHTML = "";
+      return;
+    }
+
+    if (casinoState.game === "inBetween") {
+      container.innerHTML = `
+        <button class="btn btn-secondary" data-casino-choice="small">賭小</button>
+        <button class="btn btn-secondary" data-casino-choice="big">賭大</button>
+      `;
+      return;
+    }
+
+    if (casinoState.game === "coin") {
+      container.innerHTML = `
+        <button class="btn btn-secondary" data-casino-choice="正面">正面</button>
+        <button class="btn btn-secondary" data-casino-choice="反面">反面</button>
+      `;
+    }
+  }
+
   function renderCasino(state) {
     root.querySelector("#casino-log").innerHTML = state.logs.casino
       .map((line) => `<p class="log-line">${line}</p>`)
       .join("");
+    renderCasinoControls();
   }
 
   function renderAll(state) {
@@ -260,14 +275,23 @@ export function createUI(store, actions) {
       button.addEventListener("click", () => setActiveView(button.dataset.view));
     });
 
-    root.querySelector("#save-button").addEventListener("click", actions.save);
-    root.querySelector("#reset-button").addEventListener("click", actions.reset);
+    root.querySelector("#save-button").addEventListener("click", actions.generateSaveText);
+    root.querySelector("#copy-save-button").addEventListener("click", () => {
+      const saveText = root.querySelector("#save-output").value;
+      if (!saveText) {
+        return;
+      }
+      navigator.clipboard.writeText(saveText);
+    });
+
     root.querySelector("#battle-button").addEventListener("click", () => actions.adventure("battle"));
     root.querySelector("#travel-button").addEventListener("click", () => actions.adventure("travel"));
+
     root.querySelector("#forge-button").addEventListener("click", () => {
       const forgeSelection = getForgeSelection(root);
       actions.forge(forgeSelection.type, forgeSelection.name, forgeSelection.materials);
     });
+
     root.querySelector("#equip-button").addEventListener("click", () => {
       actions.equip({
         main: root.querySelector("#equip-main").value,
@@ -295,17 +319,38 @@ export function createUI(store, actions) {
     });
 
     root.querySelector("#forge-slot").addEventListener("change", () => renderForge(store.getState()));
-    root.querySelector("#forge-name").addEventListener("input", () => renderForge(store.getState()));
     root.querySelectorAll(".forge-material").forEach((select) => {
       select.addEventListener("change", () => renderForge(store.getState()));
     });
 
-    root.querySelector("#equip-main").addEventListener("change", () => renderEquipment(store.getState()));
+    root.querySelector("#equip-main").addEventListener("change", () => {
+      const state = store.getState();
+      updateEquipmentForm(state, {
+        main: root.querySelector("#equip-main").value,
+        sub: root.querySelector("#equip-sub").value,
+        armor: root.querySelector("#equip-armor").value,
+        helmet: root.querySelector("#equip-helmet").value,
+        ring: root.querySelector("#equip-ring").value,
+      });
+    });
 
     root.querySelectorAll(".casino-button").forEach((button) => {
       button.addEventListener("click", () => {
-        actions.casino(button.dataset.game, Number(root.querySelector("#bet-amount").value));
+        const result = actions.casino(button.dataset.game, Number(root.querySelector("#bet-amount").value));
+        casinoState = result?.pending ? result : null;
+        renderCasino(store.getState());
       });
+    });
+
+    root.querySelector("#casino-controls").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-casino-choice]");
+      if (!button || !casinoState?.pending) {
+        return;
+      }
+
+      const result = actions.resolveCasino(casinoState, button.dataset.casinoChoice);
+      casinoState = result?.pending ? result : null;
+      renderCasino(store.getState());
     });
   }
 

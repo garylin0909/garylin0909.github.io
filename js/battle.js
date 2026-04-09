@@ -14,6 +14,7 @@ function getEnemyTemplate(mapId, floor) {
   const enemyId = isBossFloor ? map.bossEnemy : randomFrom(map.baseEnemyPool);
   const enemy = structuredClone(ENEMIES[enemyId]);
   const floorScale = 1 + (floor - 1) * 0.04;
+
   return {
     map,
     isBossFloor,
@@ -84,41 +85,22 @@ function rollDrops(enemy, floor) {
   return drops;
 }
 
-export function createEncounter(mapId, floor) {
-  return getEnemyTemplate(mapId, floor);
-}
-
 export function runAdventure(player, mode = "battle") {
-  const mapState = player.mapProgress[player.selectedMapId];
-  const floor = mapState.floor;
-  const encounter = createEncounter(player.selectedMapId, floor);
+  const floor = player.mapProgress[player.selectedMapId].floor;
+  const encounter = getEnemyTemplate(player.selectedMapId, floor);
   const stats = getPlayerStats(player);
   const logs = [
     `你來到「${encounter.map.name}」第 ${floor} 層。`,
     encounter.isBossFloor ? `本層為 Boss 層，遭遇 ${encounter.enemy.name}。` : `遭遇 ${encounter.enemy.name}。`,
+    mode === "travel" ? "你選擇趕路，但途中仍會爆發戰鬥。" : "你主動展開戰鬥。",
   ];
-
-  if (mode === "travel") {
-    const successRate = encounter.isBossFloor ? 0.18 : 0.72;
-    if (rollChance(successRate)) {
-      return {
-        mode,
-        logs: [...logs, "你成功趕路，避開正面衝突並前往更高樓層。"],
-        victory: false,
-        climbed: 1,
-        floor,
-      };
-    }
-
-    logs.push("趕路途中被攔下，只能強制進入戰鬥。");
-  }
 
   let playerHp = stats.maxHp;
   let enemyHp = encounter.enemy.hp;
   let round = 1;
   const playerFirst = stats.agi >= encounter.enemy.agi;
 
-  // 戰鬥與趕路共用同一份戰鬥核心，差異只在進戰率與戰後上樓率。
+  // 趕路與戰鬥都會進入同一套戰鬥流程，只有戰後前進機率不同。
   while (playerHp > 0 && enemyHp > 0 && round <= 12) {
     logs.push(`第 ${round} 回合。`);
     const turnOrder = playerFirst ? ["player", "enemy"] : ["enemy", "player"];
@@ -152,33 +134,38 @@ export function runAdventure(player, mode = "battle") {
   }
 
   if (enemyHp <= 0) {
-    const climbRate = mode === "battle" ? 0.28 : 0.56;
+    const climbRate = mode === "travel" ? 0.85 : 0.075;
     const climbed = rollChance(climbRate) ? 1 : 0;
     const rewards = {
       exp: encounter.enemy.exp,
       gold: encounter.enemy.gold,
       drops: rollDrops(encounter.enemy, floor),
     };
+
     logs.push(`你擊敗 ${encounter.enemy.name}，獲得 ${rewards.exp} EXP 與 ${rewards.gold} 金幣。`);
     rewards.drops.forEach((drop) => logs.push(`掉落：${drop.label}`));
-    logs.push(climbed ? "你順勢往上推進了一層。" : "你停留在原層，準備繼續周回。");
+    logs.push(climbed ? "你順勢前進到下一層。" : "你仍停留在目前樓層。");
 
     return {
       mode,
       logs,
       victory: true,
       climbed,
-      floor,
       rewards,
     };
   }
 
-  logs.push("你撤退了，這次沒有帶回戰利品。");
+  const climbed = mode === "travel" && rollChance(0.85) ? 1 : 0;
+  logs.push("你撤退了。");
+  if (climbed) {
+    logs.push("混亂中你仍成功前進到下一層。");
+  }
+
   return {
     mode,
     logs,
     victory: false,
-    climbed: 0,
-    floor,
+    climbed,
+    rewards: { exp: 0, gold: 0, drops: [] },
   };
 }
