@@ -43,6 +43,7 @@ function getMainLabel(item) {
 export function createUI(store, actions) {
   const root = document;
   let casinoState = null;
+  let copyStatusTimer = null;
 
   function setActiveView(viewId) {
     root.querySelectorAll(".nav-tab").forEach((button) => {
@@ -131,9 +132,9 @@ export function createUI(store, actions) {
     root.querySelector("#battle-log").innerHTML = state.logs.battle
       .map((line) => {
         let className = "log-line";
-        if (line.includes("獲得") || line.includes("掉落") || line.includes("前進")) {
+        if (line.includes("獲得") || line.includes("掉落") || line.includes("前進") || line.includes("成功逃跑")) {
           className += " log-good";
-        } else if (line.includes("撤退") || line.includes("造成")) {
+        } else if (line.includes("重傷不治") || line.includes("造成")) {
           className += " log-bad";
         } else if (line.includes("施放") || line.includes("Boss")) {
           className += " log-special";
@@ -253,19 +254,19 @@ export function createUI(store, actions) {
 
     if (casinoState.game === "coin") {
       container.innerHTML = `
-        <button class="btn btn-secondary" data-casino-action="coin" data-casino-choice="正面">正面</button>
-        <button class="btn btn-secondary" data-casino-action="coin" data-casino-choice="反面">反面</button>
+        <button class="btn btn-secondary btn-slim" data-casino-action="coin" data-casino-choice="正面">正面</button>
+        <button class="btn btn-secondary btn-slim" data-casino-action="coin" data-casino-choice="反面">反面</button>
       `;
       return;
     }
 
     if (casinoState.game === "inBetween" && casinoState.stage === "ready") {
-      container.innerHTML = `<button class="btn btn-secondary" data-casino-action="start-in-between">開始遊戲</button>`;
+      container.innerHTML = `<button class="btn btn-secondary btn-slim" data-casino-action="start-in-between">開始遊戲</button>`;
       return;
     }
 
     if (casinoState.game === "inBetween" && casinoState.stage === "betting") {
-      container.innerHTML = `<button class="btn btn-secondary" data-casino-action="finish-in-between">下注完成</button>`;
+      container.innerHTML = `<button class="btn btn-secondary btn-slim" data-casino-action="finish-in-between">下注完成</button>`;
       return;
     }
 
@@ -277,6 +278,16 @@ export function createUI(store, actions) {
       .map((line) => `<p class="log-line">${line}</p>`)
       .join("");
     renderCasinoControls();
+  }
+
+  function setCopyStatus(message) {
+    root.querySelector("#copy-status").textContent = message;
+    if (copyStatusTimer) {
+      clearTimeout(copyStatusTimer);
+    }
+    copyStatusTimer = window.setTimeout(() => {
+      root.querySelector("#copy-status").textContent = "";
+    }, 1800);
   }
 
   function openSaveModal() {
@@ -308,15 +319,19 @@ export function createUI(store, actions) {
 
     root.querySelector("#save-button").addEventListener("click", () => {
       actions.generateSaveText();
+      setCopyStatus("");
       openSaveModal();
     });
-    root.querySelector("#copy-save-button").addEventListener("click", () => {
+
+    root.querySelector("#copy-save-button").addEventListener("click", async () => {
       const saveText = root.querySelector("#save-output").value;
       if (!saveText) {
         return;
       }
-      navigator.clipboard.writeText(saveText);
+      await navigator.clipboard.writeText(saveText);
+      setCopyStatus("複製成功");
     });
+
     root.querySelector("#close-save-modal").addEventListener("click", closeSaveModal);
     root.querySelector("#save-modal").addEventListener("click", (event) => {
       if (event.target.id === "save-modal") {

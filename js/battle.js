@@ -150,20 +150,29 @@ export function runAdventure(player, mode = "battle") {
       victory: true,
       climbed,
       rewards,
+      defeat: null,
     };
   }
 
-  const climbed = mode === "travel" && rollChance(0.7) ? 1 : 0;
-  logs.push("你撤退了。");
-  if (climbed) {
-    logs.push("混亂中你仍成功前進到下一層。");
+  if (rollChance(0.25)) {
+    logs.push("你在最後一刻成功逃跑，仍留在當前樓層。");
+    return {
+      mode,
+      logs,
+      victory: false,
+      climbed: 0,
+      rewards: { exp: 0, gold: 0, drops: [] },
+      defeat: "escape",
+    };
   }
 
+  logs.push("你重傷不治，被傳送陣送回第一層復活。");
   return {
     mode,
     logs,
     victory: false,
-    climbed,
+    climbed: 0,
     rewards: { exp: 0, gold: 0, drops: [] },
+    defeat: "revive",
   };
 }

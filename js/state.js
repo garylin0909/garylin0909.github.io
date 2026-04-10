@@ -178,6 +178,11 @@ export function applyAdventureResult(state, adventureResult) {
     return rewarded;
   }
 
+  if (adventureResult.defeat === "revive") {
+    nextState.mapProgress[currentMap].floor = 1;
+    return nextState;
+  }
+
   nextState.mapProgress[currentMap].floor = Math.min(
     1000,
     nextState.mapProgress[currentMap].floor + adventureResult.climbed,

@@ -70,10 +70,6 @@
                 <p class="eyebrow">Adventure</p>
                 <h2>地圖與戰鬥</h2>
               </div>
-              <div class="toolbar">
-                <button id="battle-button" class="btn btn-primary">戰鬥</button>
-                <button id="travel-button" class="btn btn-primary">趕路</button>
-              </div>
             </div>
 
             <div class="adventure-grid">
@@ -84,6 +80,10 @@
               <div class="panel stack">
                 <h3>目前探索</h3>
                 <div id="encounter-card"></div>
+                <div class="toolbar explore-toolbar">
+                  <button id="battle-button" class="btn btn-primary">戰鬥</button>
+                  <button id="travel-button" class="btn btn-primary">趕路</button>
+                </div>
               </div>
             </div>
 
@@ -187,9 +187,9 @@
                   <input id="bet-amount" type="number" min="1" step="1" value="20" />
                 </label>
                 <div class="game-buttons">
-                  <button class="btn btn-primary casino-button" data-game="dice">擲骰子比大小</button>
-                  <button class="btn btn-primary casino-button" data-game="inBetween">射龍門</button>
-                  <button class="btn btn-primary casino-button" data-game="coin">猜正反</button>
+                  <button class="btn btn-primary btn-slim casino-button" data-game="dice">擲骰子比大小</button>
+                  <button class="btn btn-primary btn-slim casino-button" data-game="inBetween">射龍門</button>
+                  <button class="btn btn-primary btn-slim casino-button" data-game="coin">猜正反</button>
                 </div>
                 <div id="casino-controls" class="casino-controls"></div>
               </div>
@@ -214,7 +214,10 @@
           <button id="close-save-modal" class="btn btn-secondary">關閉</button>
         </div>
         <textarea id="save-output" class="save-output" readonly></textarea>
-        <button id="copy-save-button" class="btn btn-primary">複製</button>
+        <div class="modal-actions">
+          <button id="copy-save-button" class="btn btn-primary">複製</button>
+          <span id="copy-status" class="copy-status"></span>
+        </div>
       </div>
     </div>
 

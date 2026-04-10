@@ -117,7 +117,8 @@ a {
 .navbar,
 .toolbar,
 .game-buttons,
-.casino-controls {
+.casino-controls,
+.modal-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -150,6 +151,11 @@ a {
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
   color: #061019;
   font-weight: 700;
+}
+
+.btn-slim {
+  padding-top: 7px;
+  padding-bottom: 7px;
 }
 
 .btn:hover,
@@ -279,6 +285,10 @@ a {
   background: rgba(99, 214, 178, 0.08);
 }
 
+.explore-toolbar {
+  margin-top: 4px;
+}
+
 .field {
   display: grid;
   gap: 8px;
@@ -359,6 +369,12 @@ textarea {
 .save-output {
   min-height: 220px;
   resize: vertical;
+}
+
+.copy-status {
+  align-self: center;
+  color: var(--accent);
+  min-height: 24px;
 }
 
 .about-link {

@@ -98,6 +98,7 @@ function forge(type, name, materials) {
 
   const forgedItem = calculateForgeResult(type, name, chosen, currentState.playerSeed);
   store.setState((state) => applyForgeResult(state, forgedItem));
+  window.alert("鍛造完成");
 }
 
 function equip(selection) {
