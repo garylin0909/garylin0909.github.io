@@ -36,6 +36,10 @@ function renderItemStats(item) {
   return `攻擊 ${item.stats.atk} / 防禦 ${item.stats.def} / 幸運 ${item.stats.luck} / 耐久 ${item.stats.durability}`;
 }
 
+function getMainLabel(item) {
+  return `${item.name} (${FORGEABLE_TYPES[item.subtype]?.label ?? "裝備"})`;
+}
+
 export function createUI(store, actions) {
   const root = document;
   let casinoState = null;
@@ -118,7 +122,7 @@ export function createUI(store, actions) {
         <strong>${currentMap.name}</strong>
         <p>目前位於第 ${floor} 層 / 最高可達 1000 層。</p>
         <p>${isBossFloor ? "本層為 Boss 層，戰鬥強度顯著提高。" : "一般樓層，可選擇刷怪或趕路。"}</p>
-        <p>戰鬥前進率 7.5%，趕路前進率 85%。</p>
+        <p>戰鬥前進率 7.5%，趕路前進率 70%。</p>
       </div>
     `;
   }
@@ -167,6 +171,16 @@ export function createUI(store, actions) {
     });
   }
 
+  function getEquipmentSelection(state) {
+    return {
+      main: root.querySelector("#equip-main")?.value ?? state.equipped.main?.id ?? "",
+      sub: root.querySelector("#equip-sub")?.value ?? state.equipped.sub?.id ?? "",
+      armor: root.querySelector("#equip-armor")?.value ?? state.equipped.armor?.id ?? "",
+      helmet: root.querySelector("#equip-helmet")?.value ?? state.equipped.helmet?.id ?? "",
+      ring: root.querySelector("#equip-ring")?.value ?? state.equipped.ring?.id ?? "",
+    };
+  }
+
   function updateEquipmentForm(state, selectionOverride = null) {
     const selects = {
       main: root.querySelector("#equip-main"),
@@ -191,7 +205,7 @@ export function createUI(store, actions) {
 
     selects.main.innerHTML =
       `<option value="">不裝備</option>` +
-      itemsBySlot.main.map((item) => `<option value="${item.id}">${item.name}</option>`).join("");
+      itemsBySlot.main.map((item) => `<option value="${item.id}">${getMainLabel(item)}</option>`).join("");
     selects.main.value = currentSelection.main;
 
     const selectedMainSubtype = state.inventory.find((item) => item.id === currentSelection.main)?.subtype ?? null;
@@ -232,25 +246,30 @@ export function createUI(store, actions) {
   function renderCasinoControls() {
     const container = root.querySelector("#casino-controls");
 
-    if (!casinoState?.pending) {
+    if (!casinoState) {
       container.innerHTML = "";
-      return;
-    }
-
-    if (casinoState.game === "inBetween") {
-      container.innerHTML = `
-        <button class="btn btn-secondary" data-casino-choice="small">賭小</button>
-        <button class="btn btn-secondary" data-casino-choice="big">賭大</button>
-      `;
       return;
     }
 
     if (casinoState.game === "coin") {
       container.innerHTML = `
-        <button class="btn btn-secondary" data-casino-choice="正面">正面</button>
-        <button class="btn btn-secondary" data-casino-choice="反面">反面</button>
+        <button class="btn btn-secondary" data-casino-action="coin" data-casino-choice="正面">正面</button>
+        <button class="btn btn-secondary" data-casino-action="coin" data-casino-choice="反面">反面</button>
       `;
+      return;
     }
+
+    if (casinoState.game === "inBetween" && casinoState.stage === "ready") {
+      container.innerHTML = `<button class="btn btn-secondary" data-casino-action="start-in-between">開始遊戲</button>`;
+      return;
+    }
+
+    if (casinoState.game === "inBetween" && casinoState.stage === "betting") {
+      container.innerHTML = `<button class="btn btn-secondary" data-casino-action="finish-in-between">下注完成</button>`;
+      return;
+    }
+
+    container.innerHTML = "";
   }
 
   function renderCasino(state) {
@@ -258,6 +277,18 @@ export function createUI(store, actions) {
       .map((line) => `<p class="log-line">${line}</p>`)
       .join("");
     renderCasinoControls();
+  }
+
+  function openSaveModal() {
+    root.querySelector("#save-modal").classList.remove("is-hidden");
+  }
+
+  function closeSaveModal() {
+    root.querySelector("#save-modal").classList.add("is-hidden");
+  }
+
+  function autoEquip() {
+    actions.equip(getEquipmentSelection(store.getState()));
   }
 
   function renderAll(state) {
@@ -275,13 +306,22 @@ export function createUI(store, actions) {
       button.addEventListener("click", () => setActiveView(button.dataset.view));
     });
 
-    root.querySelector("#save-button").addEventListener("click", actions.generateSaveText);
+    root.querySelector("#save-button").addEventListener("click", () => {
+      actions.generateSaveText();
+      openSaveModal();
+    });
     root.querySelector("#copy-save-button").addEventListener("click", () => {
       const saveText = root.querySelector("#save-output").value;
       if (!saveText) {
         return;
       }
       navigator.clipboard.writeText(saveText);
+    });
+    root.querySelector("#close-save-modal").addEventListener("click", closeSaveModal);
+    root.querySelector("#save-modal").addEventListener("click", (event) => {
+      if (event.target.id === "save-modal") {
+        closeSaveModal();
+      }
     });
 
     root.querySelector("#battle-button").addEventListener("click", () => actions.adventure("battle"));
@@ -290,16 +330,6 @@ export function createUI(store, actions) {
     root.querySelector("#forge-button").addEventListener("click", () => {
       const forgeSelection = getForgeSelection(root);
       actions.forge(forgeSelection.type, forgeSelection.name, forgeSelection.materials);
-    });
-
-    root.querySelector("#equip-button").addEventListener("click", () => {
-      actions.equip({
-        main: root.querySelector("#equip-main").value,
-        sub: root.querySelector("#equip-sub").value,
-        armor: root.querySelector("#equip-armor").value,
-        helmet: root.querySelector("#equip-helmet").value,
-        ring: root.querySelector("#equip-ring").value,
-      });
     });
 
     root.querySelector("#map-list").addEventListener("click", (event) => {
@@ -323,34 +353,63 @@ export function createUI(store, actions) {
       select.addEventListener("change", () => renderForge(store.getState()));
     });
 
-    root.querySelector("#equip-main").addEventListener("change", () => {
-      const state = store.getState();
-      updateEquipmentForm(state, {
-        main: root.querySelector("#equip-main").value,
-        sub: root.querySelector("#equip-sub").value,
-        armor: root.querySelector("#equip-armor").value,
-        helmet: root.querySelector("#equip-helmet").value,
-        ring: root.querySelector("#equip-ring").value,
-      });
+    ["#equip-main", "#equip-sub", "#equip-armor", "#equip-helmet", "#equip-ring"].forEach((selector) => {
+      root.querySelector(selector).addEventListener("change", autoEquip);
     });
 
     root.querySelectorAll(".casino-button").forEach((button) => {
       button.addEventListener("click", () => {
-        const result = actions.casino(button.dataset.game, Number(root.querySelector("#bet-amount").value));
-        casinoState = result?.pending ? result : null;
-        renderCasino(store.getState());
+        const game = button.dataset.game;
+        if (game === "dice") {
+          casinoState = null;
+          actions.casino("dice", Number(root.querySelector("#bet-amount").value));
+          renderCasino(store.getState());
+          return;
+        }
+
+        if (game === "coin") {
+          casinoState = { game: "coin" };
+          actions.showCasinoLines(["請先選擇要猜正面還是反面。"]);
+          renderCasino(store.getState());
+          return;
+        }
+
+        if (game === "inBetween") {
+          casinoState = { game: "inBetween", stage: "ready" };
+          actions.showCasinoLines(["射龍門準備完成，按下「開始遊戲」後會先翻出兩張牌。"]);
+          renderCasino(store.getState());
+        }
       });
     });
 
     root.querySelector("#casino-controls").addEventListener("click", (event) => {
-      const button = event.target.closest("[data-casino-choice]");
-      if (!button || !casinoState?.pending) {
+      const button = event.target.closest("[data-casino-action]");
+      if (!button || !casinoState) {
         return;
       }
 
-      const result = actions.resolveCasino(casinoState, button.dataset.casinoChoice);
-      casinoState = result?.pending ? result : null;
-      renderCasino(store.getState());
+      const action = button.dataset.casinoAction;
+
+      if (action === "coin") {
+        actions.resolveCoin(button.dataset.casinoChoice, Number(root.querySelector("#bet-amount").value));
+        casinoState = { game: "coin" };
+        renderCasino(store.getState());
+        return;
+      }
+
+      if (action === "start-in-between") {
+        casinoState = actions.startInBetweenRound();
+        renderCasino(store.getState());
+        return;
+      }
+
+      if (action === "finish-in-between") {
+        const result = actions.finishInBetweenRound(casinoState, Number(root.querySelector("#bet-amount").value));
+        if (result) {
+          casinoState = { game: "inBetween", stage: "ready" };
+        }
+        renderCasino(store.getState());
+      }
     });
   }
 

@@ -43,7 +43,6 @@
               </div>
               <div class="toolbar">
                 <button id="save-button" class="btn btn-primary">產生存檔文字</button>
-                <button id="copy-save-button" class="btn btn-secondary">複製存檔</button>
               </div>
             </div>
 
@@ -60,11 +59,6 @@
             </div>
 
             <div class="panel stack">
-              <h3>存檔文字</h3>
-              <textarea id="save-output" class="save-output" readonly placeholder="按下「產生存檔文字」後，這裡會出現 JSON 存檔。"></textarea>
-            </div>
-
-            <div class="panel stack">
               <h3>已學會技能</h3>
               <div id="skill-list" class="tag-list"></div>
             </div>
@@ -78,7 +72,7 @@
               </div>
               <div class="toolbar">
                 <button id="battle-button" class="btn btn-primary">戰鬥</button>
-                <button id="travel-button" class="btn btn-secondary">趕路</button>
+                <button id="travel-button" class="btn btn-primary">趕路</button>
               </div>
             </div>
 
@@ -170,7 +164,6 @@
                   <span>戒指</span>
                   <select id="equip-ring"></select>
                 </label>
-                <button id="equip-button" class="btn btn-primary">套用裝備</button>
               </div>
               <div class="panel stack">
                 <h3>目前裝備</h3>
@@ -212,6 +205,17 @@
       <footer class="footer panel">
         <a class="about-link" href="./about/">關於本站</a>
       </footer>
+    </div>
+
+    <div class="modal-backdrop is-hidden" id="save-modal">
+      <div class="modal panel">
+        <div class="modal-head">
+          <h3>存檔文字</h3>
+          <button id="close-save-modal" class="btn btn-secondary">關閉</button>
+        </div>
+        <textarea id="save-output" class="save-output" readonly></textarea>
+        <button id="copy-save-button" class="btn btn-primary">複製</button>
+      </div>
     </div>
 
     <script type="module" src="./js/main.js"></script>

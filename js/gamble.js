@@ -10,10 +10,10 @@ function flipCoin() {
   return Math.random() < 0.5 ? "正面" : "反面";
 }
 
-function normalizeBet(playerGold, betAmount) {
+function normalizeBet(playerGold, betAmount, minimum = 1) {
   const bet = Number(betAmount);
-  if (!Number.isInteger(bet) || bet <= 0) {
-    return { ok: false, message: "下注金額必須是大於 0 的整數。" };
+  if (!Number.isInteger(bet) || bet < minimum) {
+    return { ok: false, message: `下注金額必須是大於等於 ${minimum} 的整數。` };
   }
 
   if (bet > playerGold) {
@@ -55,12 +55,7 @@ export function playDice(playerGold, betAmount) {
   };
 }
 
-export function setupInBetween(playerGold, betAmount) {
-  const validated = normalizeBet(playerGold, betAmount);
-  if (!validated.ok) {
-    return validated;
-  }
-
+export function createInBetweenRound() {
   const first = drawCard();
   const second = drawCard();
   const low = Math.min(first, second);
@@ -70,44 +65,36 @@ export function setupInBetween(playerGold, betAmount) {
     ok: true,
     pending: true,
     game: "inBetween",
-    bet: validated.bet,
-    payload: { first, second, low, high },
-    lines: [`前兩張牌是 ${first} 和 ${second}。`, "請選擇要賭第三張牌「大」還是「小」。"],
+    payload: { low, high },
+    lines: [`兩張牌翻出：${low}、${high}。`, "請輸入至少 100 金幣，然後按下「下注完成」。"],
   };
 }
 
-export function resolveInBetween(playerGold, betAmount, guess, payload) {
-  const validated = normalizeBet(playerGold, betAmount);
+export function resolveInBetween(playerGold, betAmount, payload) {
+  const validated = normalizeBet(playerGold, betAmount, 100);
   if (!validated.ok) {
     return validated;
   }
 
   const third = drawCard();
-  const win = guess === "big" ? third > payload.high : third < payload.low;
+  let deltaGold = 0;
+  let resultText = "";
 
-  return {
-    ok: true,
-    deltaGold: win ? validated.bet : -validated.bet,
-    lines: [
-      `前兩張牌是 ${payload.first} 和 ${payload.second}，你選擇賭${guess === "big" ? "大" : "小"}。`,
-      `第三張牌翻出 ${third}。`,
-      win ? `你猜中了，贏得 ${validated.bet} 金幣。` : `沒有猜中，失去 ${validated.bet} 金幣。`,
-    ],
-  };
-}
-
-export function setupCoin(playerGold, betAmount) {
-  const validated = normalizeBet(playerGold, betAmount);
-  if (!validated.ok) {
-    return validated;
+  if (third > payload.low && third < payload.high) {
+    deltaGold = validated.bet;
+    resultText = `第三張牌是 ${third}，落在中間，你贏得 ${validated.bet} 金幣。`;
+  } else if (third === payload.low || third === payload.high) {
+    deltaGold = -validated.bet * 2;
+    resultText = `第三張牌是 ${third}，剛好撞到邊牌，你失去 ${validated.bet * 2} 金幣。`;
+  } else {
+    deltaGold = -validated.bet;
+    resultText = `第三張牌是 ${third}，落在區間外，你失去 ${validated.bet} 金幣。`;
   }
 
   return {
     ok: true,
-    pending: true,
-    game: "coin",
-    bet: validated.bet,
-    lines: ["請先選擇要猜正面還是反面。"],
+    deltaGold,
+    lines: [`兩張牌是 ${payload.low}、${payload.high}。`, resultText],
   };
 }
 

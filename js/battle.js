@@ -18,7 +18,6 @@ function getEnemyTemplate(mapId, floor) {
   return {
     map,
     isBossFloor,
-    enemyId,
     enemy: {
       ...enemy,
       hp: Math.round(enemy.hp * floorScale * (isBossFloor ? 1.6 : 1)),
@@ -100,7 +99,6 @@ export function runAdventure(player, mode = "battle") {
   let round = 1;
   const playerFirst = stats.agi >= encounter.enemy.agi;
 
-  // 趕路與戰鬥都會進入同一套戰鬥流程，只有戰後前進機率不同。
   while (playerHp > 0 && enemyHp > 0 && round <= 12) {
     logs.push(`第 ${round} 回合。`);
     const turnOrder = playerFirst ? ["player", "enemy"] : ["enemy", "player"];
@@ -134,7 +132,7 @@ export function runAdventure(player, mode = "battle") {
   }
 
   if (enemyHp <= 0) {
-    const climbRate = mode === "travel" ? 0.85 : 0.075;
+    const climbRate = mode === "travel" ? 0.7 : 0.075;
     const climbed = rollChance(climbRate) ? 1 : 0;
     const rewards = {
       exp: encounter.enemy.exp,
@@ -155,7 +153,7 @@ export function runAdventure(player, mode = "battle") {
     };
   }
 
-  const climbed = mode === "travel" && rollChance(0.85) ? 1 : 0;
+  const climbed = mode === "travel" && rollChance(0.7) ? 1 : 0;
   logs.push("你撤退了。");
   if (climbed) {
     logs.push("混亂中你仍成功前進到下一層。");

@@ -1,13 +1,7 @@
 import { runAdventure } from "./battle.js";
 import { CASINO_GAMES, MAPS } from "./data.js";
 import { calculateForgeResult, getForgeCapacity } from "./forge.js";
-import {
-  playDice,
-  resolveCoin,
-  resolveInBetween,
-  setupCoin,
-  setupInBetween,
-} from "./gamble.js";
+import { createInBetweenRound, playDice, resolveCoin, resolveInBetween } from "./gamble.js";
 import {
   addAttributePoint,
   applyAdventureResult,
@@ -47,6 +41,10 @@ function buildSavePayload(state) {
 function generateSaveText() {
   const saveText = JSON.stringify(buildSavePayload(store.getState()), null, 2);
   store.setState((state) => setSaveText(state, saveText), { save: false });
+}
+
+function showCasinoLines(lines) {
+  store.setState((state) => applyCasinoResult(state, { deltaGold: 0, lines }), { save: false });
 }
 
 function selectMap(mapId) {
@@ -107,52 +105,13 @@ function equip(selection) {
 }
 
 function casino(gameKey, betAmount) {
-  if (gameKey === "dice") {
-    const result = playDice(store.getState().gold, betAmount);
-    if (!result?.ok) {
-      window.alert(result?.message ?? `無法進行 ${CASINO_GAMES[gameKey] ?? "賭局"}。`);
-      return null;
-    }
-    store.setState((state) => applyCasinoResult(state, result));
-    return result;
+  if (gameKey !== "dice") {
+    return null;
   }
 
-  if (gameKey === "inBetween") {
-    const result = setupInBetween(store.getState().gold, betAmount);
-    if (!result?.ok) {
-      window.alert(result?.message ?? "無法開始射龍門。");
-      return null;
-    }
-    store.setState((state) => applyCasinoResult(state, { deltaGold: 0, lines: result.lines }), { save: false });
-    return result;
-  }
-
-  if (gameKey === "coin") {
-    const result = setupCoin(store.getState().gold, betAmount);
-    if (!result?.ok) {
-      window.alert(result?.message ?? "無法開始猜正反。");
-      return null;
-    }
-    store.setState((state) => applyCasinoResult(state, { deltaGold: 0, lines: result.lines }), { save: false });
-    return result;
-  }
-
-  return null;
-}
-
-function resolveCasino(pendingState, choice) {
-  let result = null;
-
-  if (pendingState.game === "inBetween") {
-    result = resolveInBetween(store.getState().gold, pendingState.bet, choice, pendingState.payload);
-  }
-
-  if (pendingState.game === "coin") {
-    result = resolveCoin(store.getState().gold, pendingState.bet, choice);
-  }
-
+  const result = playDice(store.getState().gold, betAmount);
   if (!result?.ok) {
-    window.alert(result?.message ?? "本次賭局結算失敗。");
+    window.alert(result?.message ?? `無法進行 ${CASINO_GAMES[gameKey] ?? "賭局"}。`);
     return null;
   }
 
@@ -160,15 +119,44 @@ function resolveCasino(pendingState, choice) {
   return result;
 }
 
+function startInBetweenRound() {
+  const round = createInBetweenRound();
+  showCasinoLines(round.lines);
+  return { game: "inBetween", stage: "betting", payload: round.payload };
+}
+
+function finishInBetweenRound(casinoState, betAmount) {
+  const result = resolveInBetween(store.getState().gold, betAmount, casinoState.payload);
+  if (!result?.ok) {
+    window.alert(result?.message ?? "射龍門結算失敗。");
+    return null;
+  }
+  store.setState((state) => applyCasinoResult(state, result));
+  return result;
+}
+
+function resolveCoinGame(choice, betAmount) {
+  const result = resolveCoin(store.getState().gold, betAmount, choice);
+  if (!result?.ok) {
+    window.alert(result?.message ?? "猜正反結算失敗。");
+    return null;
+  }
+  store.setState((state) => applyCasinoResult(state, result));
+  return result;
+}
+
 createUI(store, {
   generateSaveText,
+  showCasinoLines,
   selectMap,
   addAttribute,
   adventure,
   forge,
   equip,
   casino,
-  resolveCasino,
+  startInBetweenRound,
+  finishInBetweenRound,
+  resolveCoin: resolveCoinGame,
 });
 
 ensureNickname();

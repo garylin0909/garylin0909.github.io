@@ -300,11 +300,6 @@ textarea {
   padding: 12px 14px;
 }
 
-.save-output {
-  min-height: 180px;
-  resize: vertical;
-}
-
 .battle-log {
   min-height: 260px;
   max-height: 340px;
@@ -333,6 +328,39 @@ textarea {
   color: #80d8ff;
 }
 
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(1, 4, 10, 0.65);
+  z-index: 30;
+}
+
+.modal-backdrop.is-hidden {
+  display: none;
+}
+
+.modal {
+  width: min(760px, 100%);
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+}
+
+.modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.save-output {
+  min-height: 220px;
+  resize: vertical;
+}
+
 .about-link {
   color: var(--text);
   font-weight: 700;
@@ -345,7 +373,8 @@ textarea {
 @media (max-width: 860px) {
   .topbar,
   .footer,
-  .section-head {
+  .section-head,
+  .modal-head {
     flex-direction: column;
     align-items: stretch;
   }
