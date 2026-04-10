@@ -54,16 +54,31 @@ function getPlayerStats(player) {
   };
 }
 
+function canUseSkill(player, skillId) {
+  const skill = SKILL_BOOKS[skillId];
+  if (!skill || !player.activeSkills.includes(skillId)) {
+    return false;
+  }
+
+  const mainSubtype = player.equipped.main?.subtype ?? null;
+  const subSubtype = player.equipped.sub?.subtype ?? null;
+  return skill.weaponTypes.some((weaponType) => weaponType === mainSubtype || weaponType === subSubtype);
+}
+
 function resolveSkill(player, combatStats, currentHp, isFirstTurn) {
-  if (isFirstTurn && player.skills.includes("focus") && rollChance(0.25 + combatStats.luck * 0.005)) {
+  if (canUseSkill(player, "focus") && isFirstTurn && rollChance(0.25 + combatStats.luck * 0.005)) {
     return { label: "集中射擊", extra: Math.round(combatStats.atk * 0.45) };
   }
 
-  if (currentHp <= combatStats.maxHp * 0.5 && player.skills.includes("burst") && rollChance(0.18 + combatStats.luck * 0.004)) {
+  if (canUseSkill(player, "burst") && currentHp <= combatStats.maxHp * 0.5 && rollChance(0.18 + combatStats.luck * 0.004)) {
     return { label: "破甲連擊", extra: Math.round(combatStats.atk * 0.6) };
   }
 
   return null;
+}
+
+function canGuard(player) {
+  return canUseSkill(player, "guard");
 }
 
 function rollDrops(enemy, floor) {
@@ -119,7 +134,7 @@ export function runAdventure(player, mode = "battle") {
         logs.push(`你造成 ${damage} 點傷害，敵方剩餘 ${enemyHp} HP。`);
       } else {
         let damage = Math.max(2, encounter.enemy.atk + Math.floor(Math.random() * 5) - stats.def);
-        if (player.skills.includes("guard") && rollChance(0.18 + stats.luck * 0.003)) {
+        if (canGuard(player) && rollChance(0.18 + stats.luck * 0.003)) {
           damage = Math.max(1, Math.round(damage * 0.6));
           logs.push("【穩固守勢】發動，傷害被壓低。");
         }

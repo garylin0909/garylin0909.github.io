@@ -32,7 +32,6 @@ function renderItemStats(item) {
   if (!item?.stats) {
     return "未裝備";
   }
-
   return `攻擊 ${item.stats.atk} / 防禦 ${item.stats.def} / 幸運 ${item.stats.luck} / 耐久 ${item.stats.durability}`;
 }
 
@@ -49,7 +48,6 @@ export function createUI(store, actions) {
     root.querySelectorAll(".nav-tab").forEach((button) => {
       button.classList.toggle("is-active", button.dataset.view === viewId);
     });
-
     root.querySelectorAll(".view").forEach((view) => {
       view.classList.toggle("is-visible", view.id === `view-${viewId}`);
     });
@@ -82,25 +80,34 @@ export function createUI(store, actions) {
       )
       .join("");
 
-    root.querySelector("#attribute-points").textContent = `未分配能力點：${state.attributePoints}`;
+    const remaining = state.attributePoints - state.pendingSpentPoints;
+    root.querySelector("#attribute-points").textContent = `可配置點數：${remaining}，待確認點數：${state.pendingSpentPoints}`;
     root.querySelector("#attribute-grid").innerHTML = ATTRIBUTE_KEYS.map(
       (key) => `
         <div class="attribute-card">
           <div class="attribute-row">
             <div>
               <span>${ATTRIBUTE_LABELS[key]}</span>
-              <strong class="attribute-value">${state.attributes[key]}</strong>
+              <strong class="attribute-value">${state.pendingAttributes[key]}</strong>
             </div>
             <button class="attribute-button" data-attribute="${key}">+1</button>
           </div>
+          <p>目前已儲存：${state.attributes[key]}</p>
         </div>
       `,
     ).join("");
 
+    root.querySelector("#skill-carry-info").textContent = `攜帶中 ${state.activeSkills.length} / 4`;
     root.querySelector("#save-output").value = state.saveText ?? "";
     root.querySelector("#skill-list").innerHTML =
       state.skills.length > 0
-        ? state.skills.map((skillId) => `<span class="tag">${SKILL_BOOKS[skillId].name}</span>`).join("")
+        ? state.skills
+            .map((skillId) => {
+              const active = state.activeSkills.includes(skillId);
+              const skill = SKILL_BOOKS[skillId];
+              return `<button class="tag ${active ? "tag-active" : ""}" data-skill="${skillId}">${skill.name}</button><span class="muted-inline">${skill.description}</span>`;
+            })
+            .join("")
         : `<span class="tag">尚未學會技能</span>`;
   }
 
@@ -246,7 +253,6 @@ export function createUI(store, actions) {
 
   function renderCasinoControls() {
     const container = root.querySelector("#casino-controls");
-
     if (!casinoState) {
       container.innerHTML = "";
       return;
@@ -360,7 +366,18 @@ export function createUI(store, actions) {
       if (!button) {
         return;
       }
-      actions.addAttribute(button.dataset.attribute);
+      actions.addPendingAttribute(button.dataset.attribute);
+    });
+
+    root.querySelector("#confirm-attributes").addEventListener("click", actions.confirmAttributes);
+    root.querySelector("#reset-attributes").addEventListener("click", actions.resetPendingAttributes);
+
+    root.querySelector("#skill-list").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-skill]");
+      if (!button) {
+        return;
+      }
+      actions.toggleSkill(button.dataset.skill);
     });
 
     root.querySelector("#forge-slot").addEventListener("change", () => renderForge(store.getState()));

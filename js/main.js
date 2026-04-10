@@ -3,14 +3,17 @@ import { CASINO_GAMES, MAPS } from "./data.js";
 import { calculateForgeResult, getForgeCapacity } from "./forge.js";
 import { createInBetweenRound, playDice, resolveCoin, resolveInBetween } from "./gamble.js";
 import {
-  addAttributePoint,
+  addPendingAttributePoint,
   applyAdventureResult,
   applyCasinoResult,
   applyEquipmentSelection,
   applyForgeResult,
+  confirmPendingAttributes,
   createStore,
+  resetPendingAttributes,
   setNickname,
   setSaveText,
+  toggleActiveSkill,
 } from "./state.js";
 import { createUI } from "./ui.js";
 
@@ -54,8 +57,28 @@ function selectMap(mapId) {
   }));
 }
 
-function addAttribute(attributeKey) {
-  store.setState((state) => addAttributePoint(state, attributeKey));
+function addPendingAttribute(attributeKey) {
+  store.setState((state) => addPendingAttributePoint(state, attributeKey), { save: false });
+}
+
+function confirmAttributes() {
+  store.setState((state) => confirmPendingAttributes(state));
+}
+
+function resetAttributes() {
+  store.setState((state) => resetPendingAttributes(state), { save: false });
+}
+
+function toggleSkill(skillId) {
+  const previous = store.getState();
+  const next = toggleActiveSkill(previous, skillId);
+  if (next === previous) {
+    if (previous.activeSkills.length >= 4 && !previous.activeSkills.includes(skillId)) {
+      window.alert("最多只能攜帶四個技能。");
+    }
+    return;
+  }
+  store.setState(next);
 }
 
 function adventure(mode) {
@@ -150,7 +173,10 @@ createUI(store, {
   generateSaveText,
   showCasinoLines,
   selectMap,
-  addAttribute,
+  addPendingAttribute,
+  confirmAttributes,
+  resetPendingAttributes: resetAttributes,
+  toggleSkill,
   adventure,
   forge,
   equip,

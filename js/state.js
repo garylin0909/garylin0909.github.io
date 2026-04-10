@@ -26,6 +26,14 @@ function buildEquipped() {
 }
 
 export function createDefaultState() {
+  const baseAttributes = {
+    str: 1,
+    vit: 1,
+    dex: 1,
+    agi: 1,
+    luck: 1,
+  };
+
   return {
     nickname: "",
     playerSeed: crypto.randomUUID(),
@@ -34,13 +42,9 @@ export function createDefaultState() {
     expToNext: 100,
     gold: 120,
     attributePoints: 0,
-    attributes: {
-      str: 1,
-      vit: 1,
-      dex: 1,
-      agi: 1,
-      luck: 1,
-    },
+    attributes: baseAttributes,
+    pendingAttributes: { ...baseAttributes },
+    pendingSpentPoints: 0,
     materials: {
       iron: 2,
       leather: 2,
@@ -50,6 +54,7 @@ export function createDefaultState() {
       ember: 0,
     },
     skills: [],
+    activeSkills: [],
     inventory: buildInventory(),
     equipped: buildEquipped(),
     selectedMapId: MAPS[0].id,
@@ -68,8 +73,11 @@ function mergeLoadedState(loadedState) {
     ...base,
     ...loadedState,
     attributes: { ...base.attributes, ...(loadedState?.attributes ?? {}) },
+    pendingAttributes: { ...(loadedState?.pendingAttributes ?? loadedState?.attributes ?? base.attributes) },
+    pendingSpentPoints: typeof loadedState?.pendingSpentPoints === "number" ? loadedState.pendingSpentPoints : 0,
     materials: { ...base.materials, ...(loadedState?.materials ?? {}) },
     skills: Array.isArray(loadedState?.skills) ? loadedState.skills : base.skills,
+    activeSkills: Array.isArray(loadedState?.activeSkills) ? loadedState.activeSkills.slice(0, 4) : base.activeSkills,
     inventory: Array.isArray(loadedState?.inventory) ? loadedState.inventory : base.inventory,
     equipped: { ...base.equipped, ...(loadedState?.equipped ?? {}) },
     mapProgress: { ...base.mapProgress, ...(loadedState?.mapProgress ?? {}) },
@@ -127,14 +135,56 @@ export function setSaveText(state, saveText) {
   };
 }
 
-export function addAttributePoint(state, key) {
-  if (!ATTRIBUTE_KEYS.includes(key) || state.attributePoints <= 0) {
+export function addPendingAttributePoint(state, key) {
+  if (!ATTRIBUTE_KEYS.includes(key)) {
+    return state;
+  }
+
+  const remaining = state.attributePoints - state.pendingSpentPoints;
+  if (remaining <= 0) {
     return state;
   }
 
   const nextState = structuredClone(state);
-  nextState.attributePoints -= 1;
-  nextState.attributes[key] += 1;
+  nextState.pendingAttributes[key] += 1;
+  nextState.pendingSpentPoints += 1;
+  return nextState;
+}
+
+export function resetPendingAttributes(state) {
+  return {
+    ...state,
+    pendingAttributes: structuredClone(state.attributes),
+    pendingSpentPoints: 0,
+  };
+}
+
+export function confirmPendingAttributes(state) {
+  return {
+    ...state,
+    attributes: structuredClone(state.pendingAttributes),
+    attributePoints: Math.max(0, state.attributePoints - state.pendingSpentPoints),
+    pendingSpentPoints: 0,
+  };
+}
+
+export function toggleActiveSkill(state, skillId) {
+  if (!state.skills.includes(skillId)) {
+    return state;
+  }
+
+  const nextState = structuredClone(state);
+  const exists = nextState.activeSkills.includes(skillId);
+  if (exists) {
+    nextState.activeSkills = nextState.activeSkills.filter((id) => id !== skillId);
+    return nextState;
+  }
+
+  if (nextState.activeSkills.length >= 4) {
+    return state;
+  }
+
+  nextState.activeSkills.push(skillId);
   return nextState;
 }
 
@@ -160,6 +210,8 @@ export function applyAdventureResult(state, adventureResult) {
 
   if (adventureResult.victory) {
     const rewarded = gainRewards(nextState, adventureResult.rewards);
+    rewarded.pendingAttributes = structuredClone(rewarded.attributes);
+    rewarded.pendingSpentPoints = 0;
     rewarded.mapProgress[currentMap].floor = Math.min(
       1000,
       rewarded.mapProgress[currentMap].floor + adventureResult.climbed,
@@ -172,6 +224,9 @@ export function applyAdventureResult(state, adventureResult) {
 
       if (drop.type === "skill" && !rewarded.skills.includes(drop.id)) {
         rewarded.skills.push(drop.id);
+        if (rewarded.activeSkills.length < 4) {
+          rewarded.activeSkills.push(drop.id);
+        }
       }
     });
 

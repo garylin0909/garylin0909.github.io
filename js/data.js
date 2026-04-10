@@ -1,4 +1,4 @@
-export const STORAGE_KEY = "text-rpg-save-v2";
+export const STORAGE_KEY = "text-rpg-save-v3";
 
 export const ATTRIBUTE_KEYS = ["str", "vit", "dex", "agi", "luck"];
 
@@ -41,11 +41,6 @@ export const SUBTYPE_COMPATIBILITY = {
   greatshield: [],
 };
 
-export const SUBTYPE_LABELS = {
-  arrow: "矢",
-  shield: "盾",
-};
-
 export const MATERIAL_DEFS = {
   iron: { name: "鐵礦", atk: 4, def: 2, luck: 0, durability: 8 },
   leather: { name: "硬皮", atk: 1, def: 4, luck: 0, durability: 10 },
@@ -60,16 +55,19 @@ export const SKILL_BOOKS = {
     id: "burst",
     name: "破甲連擊",
     description: "生命低於 50% 時有機率追加傷害。",
+    weaponTypes: ["sword", "greatsword"],
   },
   focus: {
     id: "focus",
     name: "集中射擊",
     description: "先手時有機率提升傷害。",
+    weaponTypes: ["bow"],
   },
   guard: {
     id: "guard",
     name: "穩固守勢",
     description: "受擊時有機率減傷。",
+    weaponTypes: ["shield", "greatshield"],
   },
 };
 
