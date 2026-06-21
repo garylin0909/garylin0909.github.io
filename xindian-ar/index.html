@@ -30,6 +30,7 @@
     a-scene {
       overflow: hidden !important;
       background: transparent !important;
+      z-index: 1 !important;
     }
     #arjs-video {
       object-fit: cover !important;
@@ -42,7 +43,7 @@
     }
     .guide {
       position: fixed;
-      z-index: 20;
+      z-index: 100;
       top: max(12px, env(safe-area-inset-top));
       left: 50%;
       width: min(92%, 480px);
@@ -60,7 +61,7 @@
     .guide a { display: inline-block; margin-top: 8px; color: #fff; font-size: 14px; font-weight: 700; }
     .status {
       position: fixed;
-      z-index: 20;
+      z-index: 100;
       left: 50%;
       bottom: max(18px, env(safe-area-inset-bottom));
       min-width: 210px;
@@ -76,7 +77,7 @@
     .status.found { color: #fff; background: #16845c; }
     .retry {
       position: fixed;
-      z-index: 21;
+      z-index: 101;
       left: 50%;
       bottom: max(66px, calc(env(safe-area-inset-bottom) + 66px));
       padding: 9px 12px;
@@ -90,6 +91,23 @@
       transform: translateX(-50%);
     }
     .retry[hidden] { display: none; }
+    @media (max-width: 600px) {
+      .guide {
+        top: max(8px, env(safe-area-inset-top));
+        width: calc(100% - 16px);
+        padding: 8px 10px;
+      }
+      .guide strong { font-size: 15px; }
+      .guide span { font-size: 12px; }
+      .guide a { margin-top: 4px; font-size: 12px; }
+      .status {
+        width: max-content;
+        max-width: calc(100% - 20px);
+        min-width: 0;
+        padding: 8px 12px;
+        font-size: 13px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -104,31 +122,31 @@
     embedded
     vr-mode-ui="enabled: false"
     renderer="precision: medium; alpha: true; antialias: false"
-    arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;">
-    <a-marker id="hiro-marker" preset="hiro">
-      <a-cylinder position="0 0.08 0" radius="0.76" height="0.08" color="#0d7c86"></a-cylinder>
-      <a-torus
-        position="0 0.52 0"
-        rotation="90 0 0"
-        radius="0.56"
-        radius-tubular="0.055"
-        color="#75b843"
-        animation="property: rotation; to: 90 360 0; loop: true; dur: 5000">
-      </a-torus>
+    arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3; labelingMode: black_region; debugUIEnabled: false;">
+    <a-marker
+      id="hiro-marker"
+      preset="hiro"
+      min-confidence="0.3"
+      emitevents="true"
+      smooth="true"
+      smooth-count="5"
+      smooth-tolerance="0.01"
+      smooth-threshold="2">
       <a-box
         position="0 0.5 0"
-        width="0.74"
-        height="0.22"
-        depth="0.16"
-        color="#f2a23a"
-        animation="property: position; dir: alternate; to: 0 0.68 0; loop: true; dur: 1200">
+        width="0.8"
+        height="0.8"
+        depth="0.8"
+        material="shader: flat; color: #ff7a00"
+        animation="property: rotation; to: 0 360 0; loop: true; dur: 2800; easing: linear">
       </a-box>
       <a-text
-        value="BITAN BRIDGE"
-        position="-0.88 1.05 0"
-        scale="0.72 0.72 0.72"
+        value="BITAN"
+        position="0 1.18 0"
+        rotation="-90 0 0"
+        scale="1.1 1.1 1.1"
         color="#ffffff"
-        align="left">
+        align="center">
       </a-text>
     </a-marker>
     <a-entity camera></a-entity>
