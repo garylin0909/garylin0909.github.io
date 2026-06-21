@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0d7c86">
   <title>碧潭吊橋 AR 導覽｜新店大眾運輸旅遊</title>
-  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js"></script>
   <style>
     * { box-sizing: border-box; }
@@ -29,10 +29,16 @@
     }
     a-scene {
       overflow: hidden !important;
+      background: transparent !important;
     }
-    a-scene canvas.a-canvas,
     #arjs-video {
       object-fit: cover !important;
+      z-index: 0 !important;
+    }
+    a-scene canvas.a-canvas {
+      z-index: 1 !important;
+      background: transparent !important;
+      pointer-events: none;
     }
     .guide {
       position: fixed;
@@ -68,6 +74,22 @@
       transform: translateX(-50%);
     }
     .status.found { color: #fff; background: #16845c; }
+    .retry {
+      position: fixed;
+      z-index: 21;
+      left: 50%;
+      bottom: max(66px, calc(env(safe-area-inset-bottom) + 66px));
+      padding: 9px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: 8px;
+      color: #fff;
+      background: #b44335;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      transform: translateX(-50%);
+    }
+    .retry[hidden] { display: none; }
   </style>
 </head>
 <body>
@@ -77,10 +99,11 @@
     <a href="marker.html" target="_blank" rel="noopener">開啟 Hiro Marker</a>
   </div>
   <div class="status" id="status" role="status">正在尋找 Hiro Marker</div>
+  <button class="retry" id="retry" type="button" hidden>重新啟動相機</button>
   <a-scene
     embedded
     vr-mode-ui="enabled: false"
-    renderer="logarithmicDepthBuffer: true; antialias: true"
+    renderer="precision: medium; alpha: true; antialias: false"
     arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;">
     <a-marker id="hiro-marker" preset="hiro">
       <a-cylinder position="0 0.08 0" radius="0.76" height="0.08" color="#0d7c86"></a-cylinder>
@@ -112,15 +135,38 @@
   </a-scene>
   <script>
     const marker = document.querySelector("#hiro-marker");
-    const scene = document.querySelector("a-scene");
     const status = document.querySelector("#status");
+    const retry = document.querySelector("#retry");
 
-    scene.addEventListener("camera-init", () => {
+    function showCameraError(message) {
+      status.textContent = message;
+      status.classList.remove("found");
+      retry.hidden = false;
+    }
+
+    window.addEventListener("camera-init", () => {
       status.textContent = "相機已啟動，請對準 Hiro Marker";
+      retry.hidden = true;
+
+      const video = document.querySelector("#arjs-video");
+      const tracks = video?.srcObject?.getVideoTracks?.() || [];
+      tracks.forEach((track) => {
+        track.addEventListener("ended", () => {
+          showCameraError("相機已停止，請按右側按鈕重新啟動");
+        });
+      });
     });
 
-    scene.addEventListener("camera-error", () => {
-      status.textContent = "無法開啟相機，請檢查瀏覽器權限後重新整理";
+    window.addEventListener("camera-error", () => {
+      showCameraError("無法開啟相機，請改用 Safari 或 Chrome");
+    });
+
+    retry.addEventListener("click", () => window.location.reload());
+
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) {
+        document.querySelector("#arjs-video")?.play?.().catch(() => {});
+      }
     });
 
     marker.addEventListener("markerFound", () => {
