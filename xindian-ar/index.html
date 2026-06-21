@@ -17,6 +17,23 @@
       font-family: "Microsoft JhengHei", Arial, sans-serif;
       background: #071b1c;
     }
+    a-scene,
+    a-scene canvas.a-canvas,
+    #arjs-video {
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      margin: 0 !important;
+    }
+    a-scene {
+      overflow: hidden !important;
+    }
+    a-scene canvas.a-canvas,
+    #arjs-video {
+      object-fit: cover !important;
+    }
     .guide {
       position: fixed;
       z-index: 20;
@@ -95,7 +112,17 @@
   </a-scene>
   <script>
     const marker = document.querySelector("#hiro-marker");
+    const scene = document.querySelector("a-scene");
     const status = document.querySelector("#status");
+
+    scene.addEventListener("camera-init", () => {
+      status.textContent = "相機已啟動，請對準 Hiro Marker";
+    });
+
+    scene.addEventListener("camera-error", () => {
+      status.textContent = "無法開啟相機，請檢查瀏覽器權限後重新整理";
+    });
+
     marker.addEventListener("markerFound", () => {
       status.textContent = "已辨識碧潭 AR 標記";
       status.classList.add("found");
