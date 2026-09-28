@@ -7,6 +7,8 @@ const codeField = document.querySelector("#code-editor");
 const fileInput = document.querySelector("#file-input");
 let editor = null;
 let worker = null;
+let mainPyodide = null;
+let usingFallback = false;
 let ready = false;
 let running = false;
 let runId = 0;
@@ -18,7 +20,7 @@ function setStatus(message, kind = "") {
 
 function setButtons() {
   runButton.disabled = !ready || running;
-  stopButton.disabled = !running;
+  stopButton.disabled = !running || usingFallback;
 }
 
 function appendOutput(text) {
@@ -77,6 +79,8 @@ function createEditor() {
 }
 
 function startWorker() {
+  usingFallback = false;
+  mainPyodide = null;
   ready = false;
   running = false;
   setButtons();
@@ -98,6 +102,10 @@ function startWorker() {
       setButtons();
     } else if (data.type === "error") {
       if (data.runId && data.runId !== runId) return;
+      if (!data.runId) {
+        startMainThread(data.message);
+        return;
+      }
       appendOutput(`錯誤：${data.message}\n`);
       running = false;
       if (data.runId) setStatus("Python 已就緒", "ready");
@@ -106,12 +114,54 @@ function startWorker() {
     }
   };
   worker.onerror = (event) => {
-    appendOutput(`執行環境錯誤：${event.message}\n`);
-    ready = false;
-    running = false;
-    setStatus("Python 載入失敗", "error");
-    setButtons();
+    event.preventDefault();
+    startMainThread(event.message);
   };
+}
+
+async function startMainThread(reason) {
+  if (usingFallback) return;
+  usingFallback = true;
+  worker?.terminate();
+  worker = null;
+  ready = false;
+  running = false;
+  setButtons();
+  setStatus("切換至相容模式…");
+  try {
+    const { loadPyodide } = await import("./vendor/pyodide/pyodide.mjs");
+    const indexURL = new URL("./vendor/pyodide/", location.href).href;
+    mainPyodide = await loadPyodide({
+      indexURL,
+      packageBaseUrl: "https://cdn.jsdelivr.net/pyodide/v314.0.7/full/",
+    });
+    ready = true;
+    setStatus(`Python 已就緒 · 相容模式`, "ready");
+    output.textContent = "Python 已就緒。相容模式無法中途停止執行中的程式。\n";
+    setButtons();
+  } catch (error) {
+    appendOutput(`Worker 載入失敗：${reason}\n相容模式也無法啟動：${error}\n`);
+    setStatus("Python 載入失敗", "error");
+  }
+}
+
+async function runInMainThread(id, code, stdin) {
+  const inputLines = stdin ? stdin.replace(/\r\n?/g, "\n").split("\n") : [];
+  mainPyodide.setStdout({ batched: (line) => appendOutput(`${line}\n`) });
+  mainPyodide.setStderr({ batched: (line) => appendOutput(`${line}\n`) });
+  mainPyodide.setStdin({ stdin: () => inputLines.length ? `${inputLines.shift()}\n` : null, autoEOF: false });
+  try {
+    await mainPyodide.loadPackagesFromImports(code);
+    await mainPyodide.runPythonAsync(code);
+  } catch (error) {
+    appendOutput(`錯誤：${error}\n`);
+  } finally {
+    if (id === runId) {
+      running = false;
+      setStatus("Python 已就緒 · 相容模式", "ready");
+      setButtons();
+    }
+  }
 }
 
 function runCode() {
@@ -121,7 +171,10 @@ function runCode() {
   output.textContent = `>>> 執行 main.py\n`;
   setStatus("執行中…");
   setButtons();
-  worker.postMessage({ type: "run", runId, code: getCode(), stdin: document.querySelector("#stdin-input").value });
+  const code = getCode();
+  const stdin = document.querySelector("#stdin-input").value;
+  if (usingFallback) runInMainThread(runId, code, stdin);
+  else worker.postMessage({ type: "run", runId, code, stdin });
 }
 
 function stopCode() {
