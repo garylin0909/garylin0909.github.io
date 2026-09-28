@@ -81,7 +81,7 @@ function startWorker() {
   running = false;
   setButtons();
   setStatus("載入 Python 中…");
-  worker = new Worker("./worker.js");
+  worker = new Worker("./worker.js", { type: "module" });
   worker.onmessage = ({ data }) => {
     if (data.type === "ready") {
       ready = true;

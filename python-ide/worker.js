@@ -1,13 +1,14 @@
-/* Pyodide runs in a Worker so user code cannot freeze the editor UI. */
-const PYODIDE_BASE = "https://cdn.jsdelivr.net/pyodide/v314.0.7/full/";
+/* Pyodide runs in a module Worker so user code cannot freeze the editor UI. */
+import { loadPyodide } from "./vendor/pyodide/pyodide.mjs";
+const PYODIDE_BASE = new URL("./vendor/pyodide/", self.location.href).href;
+const PACKAGE_BASE = "https://cdn.jsdelivr.net/pyodide/v314.0.7/full/";
 let pyodide = null;
 let activeRunId = null;
 
 async function initialize() {
   try {
     postMessage({ type: "loading", message: "下載 Pyodide 中…" });
-    importScripts(`${PYODIDE_BASE}pyodide.js`);
-    pyodide = await loadPyodide({ indexURL: PYODIDE_BASE });
+    pyodide = await loadPyodide({ indexURL: PYODIDE_BASE, packageBaseUrl: PACKAGE_BASE });
     postMessage({ type: "ready", version: pyodide.version });
   } catch (error) {
     postMessage({ type: "error", message: String(error) });
