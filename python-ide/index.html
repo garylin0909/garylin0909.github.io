@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <title>Python IDE | Gary 的工具與作品</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.21/lib/codemirror.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.21/theme/material-darker.css">
+  <link rel="stylesheet" href="./styles.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/codemirror@5.65.21/lib/codemirror.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/codemirror@5.65.21/mode/python/python.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/codemirror@5.65.21/addon/edit/matchbrackets.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/codemirror@5.65.21/addon/edit/closebrackets.js"></script>
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <div class="ide-shell">
+    <header class="topbar">
+      <div class="brand">
+        <a class="home-link" href="../" aria-label="返回首頁">← 首頁</a>
+        <span class="divider" aria-hidden="true"></span>
+        <strong>Python IDE</strong>
+        <span class="runtime-label">Pyodide · 瀏覽器執行</span>
+      </div>
+      <span id="runtime-status" class="status" role="status" aria-live="polite">準備載入 Python…</span>
+    </header>
+
+    <main class="workspace">
+      <section class="editor-pane" aria-label="程式編輯器">
+        <div class="pane-toolbar">
+          <span class="file-tab">● &nbsp; main.py</span>
+          <div class="toolbar-actions">
+            <button id="new-button" type="button" title="清空並建立新程式">新增</button>
+            <button id="open-button" type="button" title="開啟 .py 檔案">開啟</button>
+            <button id="download-button" type="button" title="下載 main.py">下載</button>
+            <input id="file-input" type="file" accept=".py,text/x-python,text/plain" hidden>
+          </div>
+        </div>
+        <label class="sr-only" for="code-editor">Python 程式碼</label>
+        <textarea id="code-editor" spellcheck="false"># 在這裡編寫 Python 程式
+name = "世界"
+print(f"你好，{name}！")
+</textarea>
+        <div class="editor-footer"><span id="cursor-position">第 1 行，第 1 欄</span><span>Python · UTF-8 · Tab 轉空格</span></div>
+      </section>
+
+      <section class="console-pane" aria-label="執行與輸出">
+        <div class="pane-toolbar console-toolbar">
+          <strong>執行結果</strong>
+          <div class="toolbar-actions">
+            <button id="run-button" class="run-button" type="button" disabled>▶ 執行</button>
+            <button id="stop-button" type="button" disabled>停止</button>
+            <button id="clear-button" type="button">清除</button>
+          </div>
+        </div>
+        <div class="console-body">
+          <div class="input-wrap">
+            <label for="stdin-input">標準輸入 <span>每行對應一次 input()</span></label>
+            <textarea id="stdin-input" rows="3" placeholder="若程式使用 input()，請先在此輸入資料"></textarea>
+          </div>
+          <pre id="output" class="output" role="log" aria-live="polite">正在載入 Python 執行環境…</pre>
+        </div>
+        <div class="console-footer">Ctrl / ⌘ + Enter 執行 · 程式碼自動保存在此瀏覽器</div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

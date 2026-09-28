@@ -1,231 +1,40 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-Hant">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>夜鐵文域 RPG</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Oxanium:wght@400;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="./styles.css" />
-  </head>
-  <body>
-    <div class="resource-bar">
-      <div class="resource-list" id="resource-bar"></div>
-    </div>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1220">
+  <title>Gary 的工具與作品</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="home-shell">
+    <header class="home-header">
+      <p class="eyebrow">GARYLIN0909 · GITHUB PAGES</p>
+      <h1>工具與作品入口</h1>
+      <p class="lead">選擇下方連結，前往對應的頁面。</p>
+    </header>
 
-    <div class="app-shell">
-      <header class="topbar panel">
-        <div class="brand-block">
-          <p class="eyebrow">GitHub Pages Text RPG</p>
-          <h1 id="player-title">旅人</h1>
-          <p class="subtitle">樓層探索、鍛造與賭局交織的純文字 RPG。</p>
-        </div>
-        <nav class="navbar" aria-label="主選單">
-          <button class="nav-tab is-active" data-view="state">狀態</button>
-          <button class="nav-tab" data-view="adventure">地圖/戰鬥</button>
-          <button class="nav-tab" data-view="forge">鍛造</button>
-          <button class="nav-tab" data-view="equipment">裝備</button>
-          <button class="nav-tab" data-view="casino">賭場</button>
-        </nav>
-      </header>
+    <nav class="link-grid" aria-label="站內頁面">
+      <a class="link-card" href="./python-ide/">
+        <span class="card-icon" aria-hidden="true">&gt;_</span>
+        <span class="card-content">
+          <strong>Python IDE</strong>
+          <span>在瀏覽器中編寫並執行 Python 程式。</span>
+        </span>
+        <span class="card-arrow" aria-hidden="true">↗</span>
+      </a>
+      <a class="link-card" href="./xindian-ar/">
+        <span class="card-icon" aria-hidden="true">AR</span>
+        <span class="card-content">
+          <strong>碧潭吊橋 AR 導覽</strong>
+          <span>使用相機與 Hiro Marker 體驗擴增實境示範。</span>
+        </span>
+        <span class="card-arrow" aria-hidden="true">↗</span>
+      </a>
+    </nav>
 
-      <main class="main-grid">
-        <section class="content-panel">
-          <article class="view panel is-visible" id="view-state">
-            <div class="section-head">
-              <div>
-                <p class="eyebrow">State</p>
-                <h2>角色狀態</h2>
-              </div>
-              <div class="toolbar">
-                <button id="save-button" class="btn btn-primary">產生存檔文字</button>
-              </div>
-            </div>
-
-            <div class="state-layout">
-              <div class="panel stack">
-                <h3>角色資訊</h3>
-                <div class="stat-grid" id="state-grid"></div>
-              </div>
-              <div class="panel stack">
-                <h3>能力數值</h3>
-                <p id="attribute-points" class="muted-line"></p>
-                <div class="attribute-grid" id="attribute-grid"></div>
-                <div class="toolbar">
-                  <button id="confirm-attributes" class="btn btn-primary">確定</button>
-                  <button id="reset-attributes" class="btn btn-secondary">重新配置</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="panel stack">
-              <h3>技能攜帶</h3>
-              <p id="skill-carry-info" class="muted-line"></p>
-              <div id="skill-list" class="tag-list"></div>
-            </div>
-          </article>
-
-          <article class="view panel" id="view-adventure">
-            <div class="section-head">
-              <div>
-                <p class="eyebrow">Adventure</p>
-                <h2>地圖與戰鬥</h2>
-              </div>
-            </div>
-
-            <div class="adventure-grid">
-              <div class="panel stack">
-                <h3>地圖列表</h3>
-                <div id="map-list" class="map-list"></div>
-              </div>
-              <div class="panel stack">
-                <h3>目前探索</h3>
-                <div id="encounter-card"></div>
-                <div class="toolbar explore-toolbar">
-                  <button id="battle-button" class="btn btn-primary">戰鬥</button>
-                  <button id="travel-button" class="btn btn-primary">趕路</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="panel stack battle-log-panel">
-              <h3>文字戰報</h3>
-              <div id="battle-log" class="battle-log"></div>
-            </div>
-          </article>
-
-          <article class="view panel" id="view-forge">
-            <div class="section-head">
-              <div>
-                <p class="eyebrow">Forge</p>
-                <h2>鍛造工坊</h2>
-              </div>
-            </div>
-
-            <div class="forge-grid single-column">
-              <div class="panel stack">
-                <h3>鍛造設定</h3>
-                <label class="field">
-                  <span>裝備類型</span>
-                  <select id="forge-slot"></select>
-                </label>
-                <label class="field">
-                  <span>裝備名稱</span>
-                  <input id="forge-name" type="text" maxlength="18" placeholder="未命名裝備無法製作" />
-                </label>
-                <label class="field">
-                  <span>材料 1</span>
-                  <select class="forge-material" data-index="0"></select>
-                </label>
-                <label class="field">
-                  <span>材料 2</span>
-                  <select class="forge-material" data-index="1"></select>
-                </label>
-                <label class="field">
-                  <span>材料 3</span>
-                  <select class="forge-material" data-index="2"></select>
-                </label>
-                <label class="field">
-                  <span>材料 4</span>
-                  <select class="forge-material" data-index="3"></select>
-                </label>
-                <button id="forge-button" class="btn btn-primary">開始鍛造</button>
-              </div>
-            </div>
-          </article>
-
-          <article class="view panel" id="view-equipment">
-            <div class="section-head">
-              <div>
-                <p class="eyebrow">Equipment</p>
-                <h2>裝備配置</h2>
-              </div>
-            </div>
-
-            <div class="equipment-layout">
-              <div class="panel stack">
-                <h3>裝備選擇</h3>
-                <label class="field">
-                  <span>主裝備</span>
-                  <select id="equip-main"></select>
-                </label>
-                <label class="field">
-                  <span>副裝備</span>
-                  <select id="equip-sub"></select>
-                </label>
-                <label class="field">
-                  <span>盔甲</span>
-                  <select id="equip-armor"></select>
-                </label>
-                <label class="field">
-                  <span>頭盔</span>
-                  <select id="equip-helmet"></select>
-                </label>
-                <label class="field">
-                  <span>戒指</span>
-                  <select id="equip-ring"></select>
-                </label>
-              </div>
-              <div class="panel stack">
-                <h3>目前裝備</h3>
-                <div class="equipment-grid" id="equipment-grid"></div>
-              </div>
-            </div>
-          </article>
-
-          <article class="view panel" id="view-casino">
-            <div class="section-head">
-              <div>
-                <p class="eyebrow">Casino</p>
-                <h2>黑市賭場</h2>
-              </div>
-            </div>
-
-            <div class="casino-grid">
-              <div class="panel stack">
-                <label class="field">
-                  <span>下注金幣</span>
-                  <input id="bet-amount" type="number" min="1" step="1" value="20" />
-                </label>
-                <div class="game-buttons">
-                  <button class="btn btn-primary btn-slim casino-button" data-game="dice">擲骰子比大小</button>
-                  <button class="btn btn-primary btn-slim casino-button" data-game="inBetween">射龍門</button>
-                  <button class="btn btn-primary btn-slim casino-button" data-game="coin">猜正反</button>
-                </div>
-                <div id="casino-controls" class="casino-controls"></div>
-              </div>
-              <div class="panel stack">
-                <h3>賭局紀錄</h3>
-                <div id="casino-log" class="battle-log"></div>
-              </div>
-            </div>
-          </article>
-        </section>
-      </main>
-
-      <footer class="footer panel">
-        <a class="about-link" href="./about/">關於本站</a>
-      </footer>
-    </div>
-
-    <div class="modal-backdrop is-hidden" id="save-modal">
-      <div class="modal panel">
-        <div class="modal-head">
-          <h3>存檔文字</h3>
-          <button id="close-save-modal" class="btn btn-secondary">關閉</button>
-        </div>
-        <textarea id="save-output" class="save-output" readonly></textarea>
-        <div class="modal-actions">
-          <button id="copy-save-button" class="btn btn-primary">複製</button>
-          <span id="copy-status" class="copy-status"></span>
-        </div>
-      </div>
-    </div>
-
-    <script type="module" src="./js/main.js"></script>
-  </body>
+    <footer class="home-footer">garylin0909.github.io</footer>
+  </main>
+</body>
 </html>
